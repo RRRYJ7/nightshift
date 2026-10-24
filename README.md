@@ -152,8 +152,33 @@ Full text: [`SKILL.md`](SKILL.md) · protocol spec: [`docs/PROTOCOL.md`](docs/PR
 ## This repo was built by its own skill
 
 <!--DOGFOOD:START-->
-The `.nightshift/` directory in this repository is the real, append-only log of
-the shift that built v0.1. Numbers are read straight out of it.
+`.nightshift/` in this repository is the real, append-only log of the shift that
+built v0.1 — no edited highlights. Every number below is read out of it.
+
+| | |
+| --- | --- |
+| done-criteria | 5, all proven with captured output |
+| steps / checks / checkpoints | 11 / 10 / 3 |
+| evidence | 26 artefacts, hashed |
+| evidence coverage | 100 % of steps |
+| verdict | **DONE & PROVEN** |
+
+Three things the shift caught that a chat summary would have glossed over:
+
+- **The topical detector flagged this very run** (`plan overlap 0.097`). Measured
+  across the corpus it could not separate legitimate new vocabulary from working
+  on something else, so it was demoted to an advisory, and the measurement ships
+  in [`docs/BENCHMARKS.md`](docs/BENCHMARKS.md).
+- **A reviewer pass found `Path.write_text(newline=...)`** — a 3.10-only API — in
+  the report writer, which would have raised on every single run at the floor we
+  advertised. The floor is now 3.10, and the claim matches the code.
+- **`nsh verify` failed in a fresh clone.** `* text=auto eol=lf` was rewriting
+  the CRLF inside captured output at commit time, changing the bytes and
+  breaking the digests. Evidence is now stored as opaque blobs.
+
+That last one is the argument in miniature: the tool caught its own receipt
+being altered by the version control system — precisely the class of thing a
+"done!" message never tells you.
 <!--DOGFOOD:END-->
 
 ## Benchmarks, honestly
