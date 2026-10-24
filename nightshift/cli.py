@@ -488,7 +488,9 @@ def cmd_bench(args: argparse.Namespace) -> int:
 def cmd_demo(args: argparse.Namespace) -> int:
     from . import demo
 
-    return demo.main(args.dir or ".nightshift-demo", open_report=args.open)
+    red = bool(getattr(args, "red", False))
+    dest = args.dir or (".nightshift-demo-red" if red else ".nightshift-demo")
+    return demo.main(dest, open_report=args.open, outcome="red" if red else "green")
 
 
 # --------------------------------------------------------------------------- #
@@ -596,6 +598,7 @@ def build_parser() -> argparse.ArgumentParser:
     q.set_defaults(func=cmd_bench)
 
     q = sub.add_parser("demo", help="build a deterministic demo run and open its report")
+    q.add_argument("--red", action="store_true", help="demo a shift that failed its gate")
     q.add_argument("--open", action="store_true")
     q.set_defaults(func=cmd_demo)
 

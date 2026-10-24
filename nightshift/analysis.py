@@ -282,7 +282,8 @@ def drift(contract: dict, events: Sequence[dict]) -> list[Finding]:
             Finding(
                 "unchecked_criteria",
                 "medium",
-                "%d done-criteria have never been checked" % len(unchecked),
+                util.plural(len(unchecked), "done-criterion", "done-criteria")
+                + " never checked",
                 ", ".join("%s: %s" % (d.get("id"), util.one_line(d.get("text", ""), 40)) for d in unchecked[:4]),
                 at=steps[-1].get("ts", ""),
             )

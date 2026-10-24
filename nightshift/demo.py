@@ -85,7 +85,7 @@ SCRIPT: list[tuple[str, object, float]] = [
 TOTAL_MINUTES = 7 * 60 + 32
 
 
-def _check_output(cid: str, text: str) -> str:
+def _check_output(cid: str, text: str, failed: bool = False) -> str:
     """A distinct, plausible test transcript per criterion (distinct digests matter)."""
     names = {
         "d1": ["parser::quoted_fields", "parser::crlf", "parser::bom", "parser::empty_row"],
@@ -95,6 +95,20 @@ def _check_output(cid: str, text: str) -> str:
         "d5": ["ci::checkout", "ci::test", "ci::upload_artifact"],
     }.get(cid, ["check::main"])
     body = "\n".join("test %s ... ok" % n for n in names)
+    if failed:
+        broken = names[-1]
+        body = "\n".join(
+            "test %s ... %s" % (n, "FAILED" if n == broken else "ok") for n in names
+        )
+        return (
+            "$ make check %s   # %s\n"
+            "running %d tests\n%s\n\n"
+            "failures:\n"
+            "---- %s stdout ----\n"
+            "thread 'main' panicked at 'template `statement` missing field `total`'\n\n"
+            "test result: FAILED. %d passed; 1 failed\n"
+            "exit 1\n"
+        ) % (cid, text, len(names), body, broken, len(names) - 1)
     return (
         "$ make check %s   # %s\n"
         "   Compiling reports v0.3.1\n"
@@ -136,7 +150,7 @@ def _evidence_for(intent: str) -> str:
     )
 
 
-def build(dest: str | Path = ".nightshift-demo") -> Store:
+def build(dest: str | Path = ".nightshift-demo", outcome: str = "green") -> Store:
     root = Path(dest)
     if root.exists():
         shutil.rmtree(root)
@@ -185,15 +199,19 @@ def build(dest: str | Path = ".nightshift-demo") -> Store:
                        "evidence": evidence}, ts=t)
         elif kind == "check":
             cid = str(payload)
+            if outcome == "red" and cid == "d5":
+                continue  # the run never got to the CI criterion
             item = next((d for d in contract["done"] if d["id"] == cid), None)
-            ev = st.save_evidence(_check_output(cid, item["text"] if item else ""),
+            failed = outcome == "red" and cid == "d3"
+            ev = st.save_evidence(_check_output(cid, item["text"] if item else "", failed=failed),
                                   kind="cmd", label=f"check {cid}")
             st.append(
                 {
                     "kind": "check",
                     "intent": f"check {cid}: {item['text'] if item else ''}",
                     "target": cid,
-                    "check": {"id": cid, "passed": True, "exit": 0, "cmd": item.get("cmd") if item else None},
+                    "check": {"id": cid, "passed": not failed, "exit": 1 if failed else 0,
+                              "cmd": item.get("cmd") if item else None},
                     "evidence": [ev],
                 },
                 ts=t,
@@ -205,14 +223,16 @@ def build(dest: str | Path = ".nightshift-demo") -> Store:
     return st
 
 
-def main(dest: str = ".nightshift-demo", open_report: bool = False) -> int:
-    st = build(dest)
+def main(dest: str = ".nightshift-demo", open_report: bool = False, outcome: str = "green") -> int:
+    st = build(dest, outcome=outcome)
     a = analysis.analyse(st)
-    path = report.write_report(st, a, fmt="html", project="reports-cli")
-    report.write_report(st, a, fmt="md", project="reports-cli")
+    project = "reports-cli" if outcome == "green" else "reports-cli (unfinished)"
+    path = report.write_report(st, a, fmt="html", project=project)
+    report.write_report(st, a, fmt="md", project=project)
 
     print()
-    print("  " + util.bold("NIGHTSHIFT · demo shift") + "  " + util.grey("(scripted run, real tool)"))
+    title = "NIGHTSHIFT · demo shift" + (" · red" if outcome != "green" else "")
+    print("  " + util.bold(title) + "  " + util.grey("(scripted run, real tool)"))
     print("  " + util.grey("─" * 62))
     for line in a["brief"]:
         key, _, rest = line.partition(" ")

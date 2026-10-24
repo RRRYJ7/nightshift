@@ -29,7 +29,8 @@ First public release.
 
 **Assets**
 
-- Deterministic 7.5-hour demo run (`nsh demo`).
+- Deterministic 7.5-hour demo run (`nsh demo`), plus a failing variant
+  (`nsh demo --red`) so the "Not proven" path can be seen in one command.
 - Terminal demo gif rendered from a real CLI session.
 - 33-second vertical cut for social.
 

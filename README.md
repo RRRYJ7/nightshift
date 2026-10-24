@@ -141,6 +141,21 @@ There is also a 33-second vertical cut for people who would rather watch than
 read: [`docs/nightshift-vertical.mp4`](docs/nightshift-vertical.mp4) (Chinese
 captions, 1080×1920, no audio — add your own track).
 
+### What a bad night looks like
+
+<p align="center">
+  <img src="docs/flight-report-red.png" alt="a flight report for a shift that failed its gate" width="820">
+</p>
+
+`nsh demo --red` builds the same shift with two criteria unproven: one check
+failed and one was never run. The report says `PARTIAL · NOT PROVEN`, puts both
+in the **Not proven** table with the reason, and the brief ends with a
+`NOT DONE` line.
+
+This is the report that matters. A tool that can only show you green is a
+cheerleader; the morning you need is the one that tells you which two things did
+not happen.
+
 ## The seven laws
 
 1. The plan comes before the work.

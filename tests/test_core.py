@@ -371,6 +371,14 @@ class TestDemoAndBench(unittest.TestCase):
             self.assertGreaterEqual(a["stats"]["ticks"], 5)
             self.assertTrue(a["findings"])  # the scripted churn + silent run
 
+    def test_red_demo_shows_unproven_criteria(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            st = demo.build(Path(tmp) / ".nightshift-demo-red", outcome="red")
+            a = analysis.analyse(st)
+            self.assertFalse(a["gate"].ok)
+            self.assertEqual(len(a["gate"].failures), 2)
+            self.assertIn("NOT PROVEN", a["verdict"]["label"])
+
     def test_bench_has_no_regression_on_labelled_cases(self):
         result = bench.evaluate(bench.build_cases())
         self.assertGreaterEqual(result["drift"]["f1"], 0.85)

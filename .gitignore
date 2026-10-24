@@ -9,6 +9,7 @@ venv/
 
 # demo scratch
 .nightshift-demo/
+.nightshift-demo-red/
 
 # rendered stills (regenerate with tools/make_*.py --stills)
 docs/frames/
