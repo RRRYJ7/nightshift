@@ -1,0 +1,88 @@
+{
+  "v": 1,
+  "tool": "nightshift 0.1.0",
+  "goal": "Ship NIGHTSHIFT v0.1: a skill plus a zero-dependency CLI that turns a long unattended agent run into an auditable flight report, with a real 7-hour self-run, a demo video and bilingual docs.",
+  "created_at": "2026-10-25T02:49:19+08:00",
+  "budget": {
+    "started_at": "2026-10-25T02:49:19+08:00",
+    "deadline": "2026-10-25T10:30:00+08:00",
+    "hours": null
+  },
+  "done": [
+    {
+      "id": "d1",
+      "text": "test suite green",
+      "cmd": [
+        "python",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests",
+        "-t",
+        "."
+      ],
+      "evidence_hint": "",
+      "created_at": "2026-10-25T02:49:20+08:00"
+    },
+    {
+      "id": "d2",
+      "text": "detector bench f1 >= 0.85",
+      "cmd": [
+        "python",
+        "-m",
+        "nightshift",
+        "bench",
+        "--quiet"
+      ],
+      "evidence_hint": "",
+      "created_at": "2026-10-25T02:49:20+08:00"
+    },
+    {
+      "id": "d3",
+      "text": "flight report renders",
+      "cmd": [
+        "python",
+        "-m",
+        "nightshift",
+        "report"
+      ],
+      "evidence_hint": "",
+      "created_at": "2026-10-25T02:49:20+08:00"
+    },
+    {
+      "id": "d4",
+      "text": "docs and skill exist",
+      "cmd": [
+        "python",
+        "tools/check_docs.py"
+      ],
+      "evidence_hint": "",
+      "created_at": "2026-10-25T02:49:20+08:00"
+    },
+    {
+      "id": "d5",
+      "text": "demo assets exist",
+      "cmd": [
+        "python",
+        "tools/check_assets.py"
+      ],
+      "evidence_hint": "",
+      "created_at": "2026-10-25T02:49:20+08:00"
+    }
+  ],
+  "non_goals": [
+    "no web service, no database, no cloud",
+    "no LLM calls inside the tool"
+  ],
+  "risks": [
+    "self-graded benchmark is not independent",
+    "detector has a known blind spot without --target"
+  ],
+  "stop_conditions": [
+    "every done-criterion passes with evidence (gate is green)",
+    "budget is spent and the gate is red -> stop and report, do not fake it",
+    "the same blocker survives 3 checkpoints -> stop and report",
+    "three checkpoints in a row add no measurable improvement -> stop polishing"
+  ]
+}

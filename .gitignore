@@ -1,0 +1,21 @@
+# python
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.venv/
+venv/
+
+# demo scratch
+.nightshift-demo/
+
+# rendered stills (regenerate with tools/make_*.py --stills)
+docs/frames/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# NOTE: .nightshift/ is intentionally NOT ignored.
+# The flight log of this repository is part of the repository.

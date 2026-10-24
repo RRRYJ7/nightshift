@@ -1,0 +1,29 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "nightshift-agent"
+version = "0.1.0"
+description = "Run an AI agent through a long unattended shift, then wake up to a flight report you can actually trust."
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+authors = [{ name = "Charles", email = "mrliuchaochao@outlook.com" }]
+keywords = ["ai-agent", "claude-code", "codex", "autonomous-agents", "skill", "evals"]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: OS Independent",
+  "Topic :: Software Development :: Quality Assurance",
+]
+dependencies = []
+
+[project.scripts]
+nsh = "nightshift.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/"
+
+[tool.setuptools]
+packages = ["nightshift"]

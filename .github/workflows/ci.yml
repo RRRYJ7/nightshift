@@ -1,0 +1,31 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    name: ${{ matrix.os }} · py${{ matrix.python }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        python: ["3.9", "3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - name: unit tests
+        run: python -m unittest discover -s tests -t . -v
+      - name: detector benchmark
+        run: python -m nightshift bench
+      - name: demo run renders a report
+        run: python -m nightshift demo
+      - name: docs and assets exist
+        run: python tools/check_docs.py
+      - name: the repo's own flight log still parses
+        run: python -m nightshift status --json
