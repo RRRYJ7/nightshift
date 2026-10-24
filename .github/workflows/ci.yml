@@ -29,3 +29,6 @@ jobs:
         run: python tools/check_docs.py
       - name: the repo's own flight log still parses
         run: python -m nightshift status --json
+
+      - name: every evidence digest still matches its artefact
+        run: python -m nightshift verify

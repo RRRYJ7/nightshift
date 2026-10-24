@@ -280,7 +280,8 @@ class Store:
             raise NightshiftError(f"evidence file does not exist: {p}")
         return {
             "kind": "file",
-            "ref": str(p),
+            # posix separators so a log written on Windows still resolves on CI
+            "ref": p.as_posix(),
             "digest": "sha256:" + util.sha256_file(p),
             "bytes": p.stat().st_size,
             "label": label or p.name,
@@ -291,6 +292,74 @@ class Store:
 
     def note_evidence(self, text: str) -> dict[str, Any]:
         return self.save_evidence(text, kind="note", label="typed note")
+
+    # -- verification --------------------------------------------------------
+
+    def _resolve(self, kind: str, ref: str) -> Path | None:
+        """Where an evidence item's bytes are supposed to be."""
+        if not ref:
+            return None
+        # logs written on Windows carry backslashes; normalise before resolving
+        ref = ref.replace("\\", "/")
+        candidate = Path(ref)
+        if candidate.is_absolute():
+            return candidate
+        if kind == "file":
+            # file evidence points at the project, not at the store
+            project_root = self.root.resolve().parent
+            via_project = project_root / candidate
+            return via_project if via_project.exists() else (Path.cwd() / candidate)
+        return self.root / candidate
+
+    def verify_evidence(self) -> dict[str, Any]:
+        """Recompute every digest in the log and compare it to the artefact.
+
+        Two different things look identical if you only compare hashes:
+
+        * ``cmd`` / ``test`` evidence lives inside the store and is never
+          supposed to change. A mismatch there means the receipt was edited —
+          that is tampering, and it fails.
+        * ``file`` evidence is a snapshot of a project file at a moment in time.
+          A mismatch means the project moved on, which is what projects do. It
+          is reported as *changed*, not as fraud.
+
+        Without that distinction the command cries wolf on every run that edits
+        a file after recording it, and a check that always fails is a check
+        nobody reads.
+        """
+        ok: list[dict] = []
+        tampered: list[dict] = []
+        changed: list[dict] = []
+        missing: list[dict] = []
+        skipped = 0
+        for ev in self.events():
+            for item in ev.get("evidence") or []:
+                kind = item.get("kind") or ""
+                dig = item.get("digest") or ""
+                ref = item.get("ref") or ""
+                if kind == "url" or not dig:
+                    skipped += 1
+                    continue
+                path = self._resolve(kind, ref)
+                row = {"id": ev.get("id", ""), "kind": kind, "ref": ref, "digest": dig}
+                if path is None or not path.exists():
+                    missing.append(row)
+                    continue
+                actual = "sha256:" + util.sha256_file(path)
+                if actual == dig:
+                    ok.append(row)
+                elif kind == "file":
+                    changed.append({**row, "actual": actual})
+                else:
+                    tampered.append({**row, "actual": actual})
+        return {
+            "total": len(ok) + len(tampered) + len(changed) + len(missing),
+            "ok": ok,
+            "tampered": tampered,
+            "changed": changed,
+            "missing": missing,
+            "skipped": skipped,
+        }
 
 
 def _norm(text: str) -> str:

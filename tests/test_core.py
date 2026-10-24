@@ -320,6 +320,43 @@ class TestReport(unittest.TestCase):
             self.assertEqual(a["stats"]["actions"] if "actions" in a["stats"] else a["stats"]["events"], 2)
 
 
+class TestVerify(unittest.TestCase):
+    def test_intact_capture_verifies(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            st = Store(Path(tmp) / ".nightshift")
+            st.init(goal="x", hours=1)
+            item = st.save_evidence("true output\n", kind="cmd")
+            st.append({"kind": "step", "intent": "ran it", "evidence": [item]})
+            r = st.verify_evidence()
+            self.assertEqual(len(r["ok"]), 1)
+            self.assertFalse(r["tampered"])
+
+    def test_tampered_capture_is_caught(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            st = Store(Path(tmp) / ".nightshift")
+            st.init(goal="x", hours=1)
+            item = st.save_evidence("true output\n", kind="cmd")
+            st.append({"kind": "step", "intent": "ran it", "evidence": [item]})
+            (st.root / item["ref"]).write_bytes(b"different bytes")
+            r = st.verify_evidence()
+            self.assertEqual(len(r["tampered"]), 1)
+            self.assertEqual(len(r["ok"]), 0)
+
+    def test_edited_project_file_is_changed_not_tampered(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            st = Store(root / ".nightshift")
+            st.init(goal="x", hours=1)
+            doc = root / "README.md"
+            doc.write_text("first", encoding="utf-8")
+            item = st.file_evidence(doc)
+            st.append({"kind": "step", "intent": "wrote the readme", "evidence": [item]})
+            doc.write_text("second", encoding="utf-8")
+            r = st.verify_evidence()
+            self.assertEqual(len(r["changed"]), 1)
+            self.assertEqual(len(r["tampered"]), 0)
+
+
 # --------------------------------------------------------------------------- #
 # demo + bench
 # --------------------------------------------------------------------------- #
@@ -419,6 +456,19 @@ class TestCli(unittest.TestCase):
             r = self._run(tmp, "gate")
             self.assertEqual(r.returncode, 2)
             self.assertIn("no flight plan", r.stderr)
+
+    def test_verify_returns_one_when_captured_evidence_was_edited(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            self._run(tmp, "init", "--goal", "x", "--hours", "1")
+            self._run(tmp, "run", "--", sys.executable, "-c", "print('evidence')")
+            ok = self._run(tmp, "verify")
+            self.assertEqual(ok.returncode, 0, ok.stdout + ok.stderr)
+            ev_dir = Path(tmp) / ".nightshift" / "evidence"
+            for f in ev_dir.glob("*.txt"):
+                f.write_bytes(b"tampered")
+            bad = self._run(tmp, "verify")
+            self.assertEqual(bad.returncode, 1)
+            self.assertIn("VERIFY FAILED", bad.stdout)
 
 
 if __name__ == "__main__":

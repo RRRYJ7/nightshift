@@ -162,6 +162,20 @@ gate(done, events):
 
 Exit codes: `0` green, `1` red, `2` usage error.
 
+### Verifying evidence
+
+`nsh verify` recomputes every digest in the log and compares it to the bytes on
+disk. It separates two things that look identical if you only compare hashes:
+
+- **`cmd` / `test` evidence** lives inside `.nightshift/evidence/` and is never
+  supposed to change. A mismatch is tampering: exit `1`.
+- **`file` evidence** is a snapshot of a project file at a moment in time. A
+  mismatch means the file was edited afterwards, which is what project files do.
+  It is reported as *changed*, and only fails under `--strict`.
+
+Without that distinction every run that edits a file after recording it would
+fail its own verification, and a check that always fails is a check nobody reads.
+
 ---
 
 ## 5. Detectors

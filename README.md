@@ -60,6 +60,7 @@ night you did not watch.**
 | **Checkpoints** — honest progress + drift detection every ~45 min | Silent drift, endless polishing |
 | **Convergence check** — three flat checkpoints = stop | Hour 7 costing more than it buys |
 | **Evidence gate** — `nsh gate` exits 0 only if every criterion passed *with* proof | Green-by-vibes |
+| **Verification** — `nsh verify` recomputes every hash; a tampered receipt fails | Evidence nobody ever checked |
 | **Flight report** — a single self-contained HTML file with a mandatory *"Not proven"* section | Morning surprises |
 
 ## Quickstart (60 seconds, no API key, no service)
@@ -89,6 +90,7 @@ nsh step "rewrote the intro by hand" -e README.md
 nsh tick --progress 40 --note "parser done, templating next"
 
 nsh gate        # exit 0 only when every criterion is proven
+nsh verify      # recompute every evidence digest against the bytes on disk
 nsh report      # .nightshift/reports/flight-report.html
 nsh brief       # the ten lines above
 ```

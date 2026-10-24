@@ -413,18 +413,58 @@ def cmd_log(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_verify(args: argparse.Namespace) -> int:
+    st = _need(args)
+    r = st.verify_evidence()
+    failed = bool(r["tampered"]) or (args.strict and (r["changed"] or r["missing"]))
+    if args.json:
+        import json
+
+        payload = {k: v for k, v in r.items() if k != "ok"}
+        payload["ok_count"] = len(r["ok"])
+        payload["failed"] = failed
+        print(json.dumps(payload, ensure_ascii=False, indent=2))
+        return 1 if failed else 0
+    _head("evidence verification", f"{r['total']} artefact(s) referenced by the log")
+    for row in r["tampered"][:12]:
+        print(f"  {util.red('✗')} {row['kind']} {util.one_line(row['ref'], 46)}")
+        print(util.grey(f"      log says {row['digest'][:26]}  file is {row['actual'][:26]}"))
+    for row in r["changed"][:6]:
+        print(f"  {util.cyan('~')} {util.one_line(row['ref'], 46)}  {util.grey('changed since it was recorded')}")
+    for row in r["missing"][:6]:
+        print(f"  {util.yellow('!')} {util.one_line(row['ref'], 46)}  {util.grey('missing')}")
+    print()
+    print(f"  {util.green(str(len(r['ok'])))} intact · "
+          f"{util.red(str(len(r['tampered'])))} tampered · "
+          f"{util.cyan(str(len(r['changed'])))} changed · "
+          f"{util.yellow(str(len(r['missing'])))} missing · "
+          f"{util.grey(str(r['skipped']) + ' without a digest')}")
+    if r["tampered"]:
+        print(f"  {util.red('VERIFY FAILED')} — evidence inside the store no longer matches its digest.")
+    elif failed:
+        print(f"  {util.red('VERIFY FAILED')} — strict mode.")
+    elif r["changed"]:
+        print(f"  {util.green('VERIFY OK')} — every captured artefact is intact; "
+              f"{len(r['changed'])} project file(s) moved on since they were snapshotted.")
+    else:
+        print(f"  {util.green('VERIFY OK')} — every digest still matches the bytes on disk.")
+    print()
+    return 1 if failed else 0
+
+
 def cmd_doctor(args: argparse.Namespace) -> int:
     _head("doctor", f"nightshift {__version__} · python {sys.version.split()[0]}")
     checks = [
         ("python >= 3.10", sys.version_info >= (3, 10)),
         ("utf-8 stdout", True),
         ("write access", _can_write(Path("."))),
-        ("terminal supports ansi", util.color_enabled()),
     ]
     for label, ok in checks:
         print(f"  {util.green('✓') if ok else util.red('✗')} {label}")
+    colour = "on" if util.color_enabled() else "off (NO_COLOR, or stdout is not a tty)"
+    print(f"  {util.grey('·')} colour: {colour}")
     root = find_root()
-    print(f"  {util.grey('flight plan')}: {root if root else util.grey('none here (nsh init)')}")
+    print(f"  {util.grey('·')} flight plan: {root if root else 'none here (nsh init)'}")
     print()
     return 0
 
@@ -558,6 +598,11 @@ def build_parser() -> argparse.ArgumentParser:
     q = sub.add_parser("demo", help="build a deterministic demo run and open its report")
     q.add_argument("--open", action="store_true")
     q.set_defaults(func=cmd_demo)
+
+    q = sub.add_parser("verify", help="recompute every evidence digest and compare it to the file")
+    q.add_argument("--json", action="store_true")
+    q.add_argument("--strict", action="store_true", help="also fail when an artefact is missing")
+    q.set_defaults(func=cmd_verify)
 
     q = sub.add_parser("doctor", help="check the environment")
     q.set_defaults(func=cmd_doctor)
