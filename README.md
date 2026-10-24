@@ -177,8 +177,8 @@ built v0.1 — no edited highlights. Every number below is read out of it.
 | | |
 | --- | --- |
 | done-criteria | 5, all proven with captured output |
-| steps / checks / checkpoints | 11 / 10 / 3 |
-| evidence | 26 artefacts, hashed |
+| steps / checks / checkpoints | 11 / 15 / 3 |
+| evidence | 31 artefacts, hashed |
 | evidence coverage | 100 % of steps |
 | verdict | **DONE & PROVEN** |
 
