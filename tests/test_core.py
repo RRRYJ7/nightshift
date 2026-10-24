@@ -187,6 +187,28 @@ class TestDrift(unittest.TestCase):
 
 
 # --------------------------------------------------------------------------- #
+# targets
+# --------------------------------------------------------------------------- #
+
+class TestTargets(unittest.TestCase):
+    def test_counts_touches_and_whether_a_check_followed(self):
+        events = [
+            ev(1, "step", "edit a", target="a.py"),
+            ev(2, "step", "edit a again", target="a.py"),
+            ev(3, "check", "check d1", check={"id": "d1", "passed": True, "exit": 0}),
+            ev(4, "step", "edit b", target="b.py"),
+        ]
+        rows = {r["target"]: r for r in analysis.targets(events)}
+        self.assertEqual(rows["a.py"]["touches"], 2)
+        self.assertTrue(rows["a.py"]["verified_after"])
+        self.assertFalse(rows["b.py"]["verified_after"])
+
+    def test_ignores_steps_without_a_target(self):
+        events = [ev(1, "step", "no target here"), ev(2, "step", "edit a", target="a.py")]
+        self.assertEqual([r["target"] for r in analysis.targets(events)], ["a.py"])
+
+
+# --------------------------------------------------------------------------- #
 # convergence
 # --------------------------------------------------------------------------- #
 

@@ -110,6 +110,7 @@ def model(analysis: dict[str, Any], project: str = "") -> dict[str, Any]:
         "risks": contract.get("risks") or [],
         "events": analysis["events"],
         "hourly": analysis["hourly"],
+        "targets": analysis.get("targets", []),
         "coverage": analysis["coverage_series"],
         "generated": util.iso(),
     }
@@ -179,6 +180,17 @@ def render_html(m: dict[str, Any]) -> str:
             + f'<div style="font-size:13px;color:#475569;margin-top:6px">'
               f'<strong>{_e(conv["state"])}</strong> · {_e(conv.get("why", ""))}</div>'
         )
+
+    target_rows_cells = []
+    for t in m.get("targets") or []:
+        verified = '<span class="ok">yes</span>' if t["verified_after"] else '<span class="no">no</span>'
+        target_rows_cells.append(
+            f'<tr><td class="mono">{_e(t["target"])}</td><td>{int(t["touches"])}</td>'
+            f'<td class="mono">{_e(_when(t["last"]))}</td><td>{verified}</td></tr>'
+        )
+    target_rows = "".join(target_rows_cells) or (
+        '<tr><td colspan="4" class="empty">no step recorded a --target</td></tr>'
+    )
 
     hourly_html = svg.bar_chart(m["hourly"], width=560, height=110, color=svg.CYAN) if m["hourly"] else ""
     timeline_svg = svg.timeline(m["events"], findings, width=920, height=140)
@@ -253,6 +265,14 @@ def render_html(m: dict[str, Any]) -> str:
 <section>
   <h2>Drift &amp; near-misses</h2>
   <div class="card">{findings_html}</div>
+</section>
+
+<section>
+  <h2>Where the time went</h2>
+  <div class="card"><table>
+    <tr><th>target</th><th>touches</th><th>last touched</th><th>verified after?</th></tr>
+    {target_rows}
+  </table></div>
 </section>
 
 <section class="grid2">
@@ -337,6 +357,16 @@ def render_md(m: dict[str, Any]) -> str:
             lines.append(f"- **{f['severity']}** · {f['title']} — {f['detail']} ({f.get('at', '')})")
     else:
         lines.append("_no drift flags_")
+    lines += ["", "## Where the time went", ""]
+    if m.get("targets"):
+        lines += ["| target | touches | last touched | verified after |", "| --- | --- | --- | --- |"]
+        for t in m["targets"]:
+            lines.append(
+                "| `%s` | %d | %s | %s |"
+                % (t["target"], int(t["touches"]), _when(t["last"]), "yes" if t["verified_after"] else "no")
+            )
+    else:
+        lines.append("_no step recorded a --target_")
     lines += ["", "## Convergence", "", f"{m['convergence'].get('state')} — {m['convergence'].get('why', '')}", ""]
     lines += ["## Non-goals", ""] + [f"- {x}" for x in m["non_goals"]] + [""]
     lines += ["## Known risks", ""] + [f"- {x}" for x in m["risks"]] + [""]

@@ -135,6 +135,7 @@ One file, no CDN, no JavaScript, printable:
 - **Black-box timeline** — every step, check and checkpoint, drift flags pinned to the moment they happened.
 - **Proven / Not proven** — side by side, each with a sha256 of the captured bytes.
 - **Drift & near-misses** — the churn loop, the silent stretch, the thing that almost went wrong at 04:10.
+- **Where the time went** — every `--target`, how often it was touched, and whether a check followed.
 - **Convergence + activity** — was hour seven worth it?
 
 There is also a 33-second vertical cut for people who would rather watch than

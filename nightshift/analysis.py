@@ -393,6 +393,44 @@ def quick_stats(contract: dict, events: Sequence[dict]) -> dict[str, Any]:
     }
 
 
+def targets(events: Sequence[dict], limit: int = 12) -> list[dict[str, Any]]:
+    """Where the steps went, per `--target`, and whether a check followed.
+
+    A reviewer's first question about an overnight run is "what did it actually
+    touch", and the second is "did anything verify that afterwards".
+    """
+    rows: dict[str, dict[str, Any]] = {}
+    last_check_idx = -1
+    for i, ev in enumerate(events):
+        kind = ev.get("kind")
+        if kind == "check":
+            last_check_idx = i
+            continue
+        if kind != "step":
+            continue
+        target = (ev.get("target") or "").strip()
+        if not target:
+            continue
+        row = rows.get(target)
+        if row is None:
+            row = rows[target] = {"target": target, "touches": 0, "first": ev.get("ts", ""),
+                                  "last": ev.get("ts", ""), "last_idx": i}
+        row["touches"] += 1
+        row["last"] = ev.get("ts", "")
+        row["last_idx"] = i
+    out = []
+    for row in rows.values():
+        out.append({
+            "target": row["target"],
+            "touches": row["touches"],
+            "first": row["first"],
+            "last": row["last"],
+            "verified_after": last_check_idx > row["last_idx"],
+        })
+    out.sort(key=lambda r: (-r["touches"], r["target"]))
+    return out[:limit]
+
+
 def hourly(events: Sequence[dict]) -> list[tuple[str, int]]:
     """Event counts bucketed by hour, for the activity chart."""
     if not events:
@@ -507,5 +545,6 @@ def analyse(store) -> dict[str, Any]:
         "verdict": v,
         "brief": brief(contract, events, stats, g, conv, findings),
         "hourly": hourly(events),
+        "targets": targets(events),
         "coverage_series": coverage_series(events),
     }

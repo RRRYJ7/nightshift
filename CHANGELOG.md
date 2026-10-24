@@ -19,7 +19,8 @@ First public release.
   low-severity topical advisory.
 - Convergence detection from checkpoints carrying `--progress`.
 - Self-contained HTML flight report (no JS, no CDN) with a mandatory
-  **Not proven** section, and a ten-line wake-up brief.
+  **Not proven** section, a ten-line wake-up brief, and a *Where the time went*
+  table (every `--target`, how often it was touched, whether a check followed).
 
 **Interfaces**
 
