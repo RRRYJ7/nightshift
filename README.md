@@ -168,6 +168,27 @@ not happen.
 
 Full text: [`SKILL.md`](SKILL.md) · protocol spec: [`docs/PROTOCOL.md`](docs/PROTOCOL.md)
 
+## Who this is for
+
+Anyone who leaves an agent working and then has to trust the result:
+
+- **Developers shipping a feature overnight.** The morning report says which
+  tests never ran, and which file was edited four times without a check.
+- **Researchers running long jobs.** "The pipeline finished" stops being a
+  sentence and becomes a row with an exit code and a hash. If your simulation
+  writes a result file, that file is the evidence.
+- **Analysts rebuilding a dataset.** Row counts, duplicate ids, date ranges and
+  schema checks become done-criteria; the report shows which ones ran at 04:10
+  and what they printed.
+- **Writers, designers and ops people** producing deliverables that must parse:
+  a PDF that renders, a spec with all nine sections, a config that validates, a
+  deck that opens.
+- **Students and hobbyists** who want to know what the agent actually did at 3am
+  instead of what it says it did.
+
+The only requirement is that "done" can be expressed as a command. If it can
+only be expressed as a feeling, no tool helps — including this one.
+
 ## This repo was built by its own skill
 
 <!--DOGFOOD:START-->
