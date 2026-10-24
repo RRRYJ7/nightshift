@@ -245,13 +245,17 @@ def cmd_tick(args: argparse.Namespace) -> int:
     print(_kv("gate", (util.green("GREEN") if a["gate"].ok else util.red("RED"))
               + f"  {a['stats']['criteria_passed']}/{a['stats']['criteria']} criteria"))
     print(_kv("coverage", util.pct(a["stats"]["coverage"])))
-    if a["findings"]:
-        print(_kv("drift", util.yellow(f"{len(a['findings'])} flag(s)")))
-        for f in a["findings"][-3:]:
+    structural = [f for f in a["findings"] if f.severity in ("high", "medium")]
+    advisory = [f for f in a["findings"] if f.severity == "low"]
+    if structural:
+        print(_kv("drift", util.yellow(f"{len(structural)} flag(s)")))
+        for f in structural[-3:]:
             col = util.red if f.severity == "high" else util.yellow
             print(f"      {col('▸')} {f.title}")
     else:
         print(_kv("drift", util.green("clean")))
+    if advisory:
+        print(_kv("advisory", util.grey(f"{len(advisory)} low-confidence: {advisory[0].title}")))
     conv = a["convergence"]
     if conv.get("state") == "plateau":
         print(_kv("trend", util.yellow("plateau — " + conv.get("why", ""))))
@@ -319,10 +323,14 @@ def cmd_status(args: argparse.Namespace) -> int:
     print(_rule())
     print(f"  steps {util.bold(str(st_['steps']))}   evidence {util.bold(util.pct(st_['coverage']))}"
           f"   checks {st_['checks']}   checkpoints {st_['ticks']}   events {st_['events']}")
-    if a["findings"]:
-        worst = max(a["findings"], key=lambda f: {"high": 0, "medium": 1, "low": 2}[f.severity])
+    structural = [f for f in a["findings"] if f.severity in ("high", "medium")]
+    advisory = [f for f in a["findings"] if f.severity == "low"]
+    if structural:
+        worst = max(structural, key=lambda f: {"high": 0, "medium": 1, "low": 2}[f.severity])
         col = util.red if worst.severity == "high" else util.yellow
-        print(f"  drift {col(str(len(a['findings'])) + ' flag(s)')}  {util.grey(util.one_line(worst.title, 64))}")
+        print(f"  drift {col(str(len(structural)) + ' flag(s)')}  {util.grey(util.one_line(worst.title, 64))}")
+    elif advisory:
+        print(f"  drift {util.green('clean')}  {util.grey(str(len(advisory)) + ' advisory: ' + util.one_line(advisory[0].title, 50))}")
     else:
         print(f"  drift {util.green('clean')}")
     conv = a["convergence"]

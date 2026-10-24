@@ -29,6 +29,10 @@ TREND     improving - still climbing: +68 points over 5.7h
 
 ---
 
+> **A skill is a request. An exit code is a fact.**
+
+---
+
 ## The problem
 
 You go to sleep. The agent works. You wake up to:
@@ -61,7 +65,7 @@ night you did not watch.**
 ## Quickstart (60 seconds, no API key, no service)
 
 ```bash
-git clone https://github.com/<you>/nightshift && cd nightshift
+git clone https://github.com/chchliu/nightshift && cd nightshift
 python -m nightshift demo --open
 ```
 
@@ -69,9 +73,12 @@ That builds a scripted 7.5-hour run — real black box, real evidence files, rea
 digests — and opens the flight report. Read the **Not proven** section first.
 It is the point.
 
-Then drive your own run:
+Then drive your own run (`nsh` below is the installed entry point; without an
+install, every one of these is `python -m nightshift`):
 
 ```bash
+pipx install .                    # optional, gives you `nsh` on PATH
+
 nsh init --goal "ship v0.1 of the report CLI" --deadline "06:40"
 nsh done add "tests pass"        -- python -m pytest -q
 nsh done add "the CLI builds"    -- npm run build

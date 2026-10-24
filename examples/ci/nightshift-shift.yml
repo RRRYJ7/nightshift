@@ -1,0 +1,62 @@
+# Example: run a night shift inside CI, and refuse to merge a red one.
+#
+# Copy this into .github/workflows/ of a repository where an agent (or a script)
+# does unattended work overnight. The important part is the last step: the job
+# fails when the evidence gate is red, so "the agent said it was done" stops
+# being a merge criterion.
+#
+# Requirements:
+#   - .nightshift/ is committed by the agent at the end of its shift
+#   - `nsh` is on PATH (pipx install nightshift-agent, or use python -m nightshift)
+
+name: nightshift
+
+on:
+  schedule:
+    - cron: "0 23 * * *"      # 23:00 UTC, i.e. someone's night
+  workflow_dispatch:
+
+jobs:
+  shift:
+    runs-on: ubuntu-latest
+    timeout-minutes: 480       # hard cap: the harness is not the only budget
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: install
+        run: pip install -e .   # or: pipx install nightshift-agent
+
+      - name: run the agent's shift
+        run: |
+          # Replace with however your agent is invoked.
+          # It is responsible for calling `nsh run` / `nsh tick` as it works.
+          python scripts/agent_shift.py
+
+      - name: re-verify every criterion on a clean checkout
+        id: gate
+        continue-on-error: true
+        run: nsh check --all
+
+      - name: render the flight report
+        if: always()
+        run: nsh report --md
+
+      - name: upload the report and the black box
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: nightshift-report
+          path: |
+            .nightshift/reports/
+            .nightshift/events.jsonl
+
+      - name: fail the job if the gate is red
+        if: steps.gate.outcome != 'success'
+        run: |
+          echo "::error::Nightshift gate is red - the shift did not prove its done-criteria."
+          nsh brief
+          exit 1
