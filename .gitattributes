@@ -1,4 +1,8 @@
 * text=auto eol=lf
+
+# Evidence files are hashed. Any newline translation changes the bytes and
+# breaks every digest in the log, so git must treat them as opaque blobs.
+.nightshift/evidence/** -text
 *.png binary
 *.gif binary
 *.mp4 binary
