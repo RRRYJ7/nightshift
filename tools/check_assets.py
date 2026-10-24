@@ -16,6 +16,7 @@ REQUIRED = [
     ("docs/flight-report.png", 40_000, "screenshot of the rendered flight report"),
     ("docs/flight-report-red.png", 40_000, "the report for a failed shift"),
     ("docs/nightshift-vertical.mp4", 500_000, "1080x1920 promo video"),
+    ("docs/nightshift-wide.mp4", 400_000, "1920x1080 English trailer"),
 ]
 
 

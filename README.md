@@ -140,7 +140,8 @@ One file, no CDN, no JavaScript, printable:
 
 There is also a 33-second vertical cut for people who would rather watch than
 read: [`docs/nightshift-vertical.mp4`](docs/nightshift-vertical.mp4) (Chinese
-captions, 1080×1920, no audio — add your own track).
+captions, 1080×1920, no audio — add your own track), and a 31-second English
+landscape cut: [`docs/nightshift-wide.mp4`](docs/nightshift-wide.mp4).
 
 ### What a bad night looks like
 
