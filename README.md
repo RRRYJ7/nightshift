@@ -162,10 +162,13 @@ the shift that built v0.1. Numbers are read straight out of it.
 
 ```
 structural drift  precision 1.00   recall 0.80   f1 0.89   (silent_run + churn)
-topical advisory  precision 1.00   recall 1.00   f1 1.00   (off_topic, low severity)
+topical advisory  precision 0.75   recall 1.00   f1 0.86   (off_topic, low severity)
 gate              accuracy 1.00
-confusion         tp=4 fp=0 tn=10 fn=1
+confusion         tp=4 fp=0 tn=11 fn=1
 ```
+
+The corpus is 15 synthetic runs plus **one real one**: this repository's own
+shift, exported verbatim, including the topical flag that was wrong.
 
 Three caveats, all printed by the tool itself:
 

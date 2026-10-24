@@ -1,0 +1,15 @@
+
+  docs check
+  ------------------------------------------------------------
+  ok README.md                   9023 bytes
+  ok README.zh-CN.md             5527 bytes
+  ok SKILL.md                    8642 bytes
+  ok docs/PROTOCOL.md            9737 bytes
+  ok docs/WHY.md                 4829 bytes
+  ok docs/BENCHMARKS.md          7430 bytes
+  ok CONTRIBUTING.md             1875 bytes
+  ok LICENSE                     1064 bytes
+  ok install.sh                   816 bytes
+  ok install.ps1                  983 bytes
+  ------------------------------------------------------------
+  10 documents ok

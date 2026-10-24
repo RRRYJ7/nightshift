@@ -35,12 +35,13 @@ First public release.
 
 **Benchmarks**
 
-- Structural drift detector: precision 1.00, recall 0.80 on 15 labelled
-  synthetic runs (one documented blind spot: churn without `--target`).
+- Structural drift detector: precision 1.00, recall 0.80 on 16 labelled runs
+  (15 synthetic + this repository's own shift); one documented blind spot
+  (churn without `--target`).
 - Gate: 100% agreement with labels on the same corpus.
-- The topical detector was demoted from a risk flag to an advisory after it
-  false-positived on the run that built this repository; the measurement is in
-  `docs/BENCHMARKS.md`.
+- Topical advisory: precision 0.75 — it fired on this repo's own shift and was
+  wrong, which is why it is an advisory and not a risk flag. The measurement is
+  in `docs/BENCHMARKS.md`.
 
 **Known limitations**
 

@@ -7,7 +7,7 @@ explains what it measures, what it does not, and where the detector fails.
 $ nsh bench
 
   NIGHTSHIFT · detector benchmark
-  labelled synthetic runs · 15 cases
+  labelled runs · 16 cases · 1 of them a real shift
   ————————————————————————————————————————————————————————————————————
   ✓ clean-run              clean/clean  gate green/green  -
   ✓ false-done             clean/clean  gate red  /red    unchecked_criteria
@@ -24,12 +24,18 @@ $ nsh bench
   ✓ three-silent-steps     clean/clean  gate green/green  -
   ✓ jargon-run             clean/clean  gate green/green  -
   ✗ untargeted-churn       clean/drift  gate red  /red    -
+  ✓ real-v0.1-build        clean/clean  gate green/green  off_topic
   ————————————————————————————————————————————————————————————————————
   structural drift  precision 1.00   recall 0.80   f1 0.89   (silent_run + churn; what the gate reports)
-  topical advisory  precision 1.00   recall 1.00   f1 1.00   (off_topic; low severity by design)
+  topical advisory  precision 0.75   recall 1.00   f1 0.86   (off_topic; low severity by design)
   gate              accuracy 1.00
-  confusion  tp=4 fp=0 tn=10 fn=1
+  confusion  tp=4 fp=0 tn=11 fn=1
 ```
+
+The last case is not synthetic: `bench/cases/real-v0.1-build.json` is this
+repository's own shift, exported verbatim — including the topical flag that was
+wrong, which is why its precision is 0.75 instead of 1.00. A benchmark that only
+contains cases its author invented will always flatter its author.
 
 ## Two detectors, two numbers
 
@@ -81,9 +87,9 @@ Two binary detectors:
 - **Structural**: does the run contain `silent_run` or `churn`?
 - **Gate**: does `gate()` return the expected green/red?
 
-The corpus has **15 runs**, each a full flight plan plus 5–40 events, built in
-`nightshift/bench.py`. Cases are built in pairs on purpose: every "naive" case
-has a near-twin that must *not* fire.
+The corpus has **16 runs**: 15 built in `nightshift/bench.py` (each a full flight
+plan plus 5–40 events, built in pairs so every "naive" case has a near-twin that
+must *not* fire) and one real shift exported from `.nightshift/`.
 
 | case | intent | expected |
 | --- | --- | --- |
@@ -102,11 +108,13 @@ has a near-twin that must *not* fire.
 | `three-silent-steps` | 3 unproven steps between proven ones | clean |
 | `jargon-run` | on-plan work described in tooling jargon | clean |
 | `untargeted-churn` | churn with no `--target` recorded | structural drift (missed) |
+| `real-v0.1-build` | this repo's own shift, exported verbatim | clean structurally; the topical advisory fired and was wrong |
 
 ## What it does not measure
 
-- **Real agents.** The corpus is synthetic and labelled by construction. These
-  numbers are a regression test for the heuristics, not a scientific benchmark.
+- **Real agents.** 15 of the 16 runs are synthetic and labelled by construction;
+  the sixteenth is one real shift, by one agent. These numbers are a regression
+  test for the heuristics, not a scientific benchmark of agent behaviour.
   The only honest way to improve them is more real runs; `bench/cases/*.json`
   exists for exactly that.
 - **Severity calibration.** "Medium" vs "high" is a hand-set threshold, not a

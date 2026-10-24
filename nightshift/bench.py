@@ -329,14 +329,19 @@ def evaluate(cases: Sequence[dict]) -> dict[str, Any]:
 
 
 def main(verbose: bool = True, as_json: bool = False) -> int:
-    result = evaluate(build_cases())
+    cases = build_cases()
+    result = evaluate(cases)
     if as_json:
         print(json.dumps(result, ensure_ascii=False, indent=2))
         return 0 if result["drift"]["f1"] > 0.0 else 1
     if verbose:
+        real = sum(1 for c in cases if c.get("real"))
+        label = "  labelled runs · %d cases" % result["n"]
+        if real:
+            label += " · %d of them a real shift" % real
         print()
         print(util.bold("  NIGHTSHIFT · detector benchmark"))
-        print(util.grey("  labelled synthetic runs · " + str(result["n"]) + " cases"))
+        print(util.grey(label))
         print(util.grey("  " + "—" * 68))
         for r in result["rows"]:
             mark = util.green("✓") if r["ok"] else util.red("✗")
