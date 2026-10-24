@@ -61,9 +61,15 @@ def _ev_line(ev: dict) -> str:
 
 def cmd_init(args: argparse.Namespace) -> int:
     st = Store(args.dir or store_mod.DEFAULT_DIR)
+    deadline = None
+    if args.deadline:
+        try:
+            deadline = util.parse_deadline(args.deadline)
+        except ValueError as exc:
+            raise NightshiftError(str(exc))
     contract = st.init(
         goal=args.goal,
-        deadline=util.parse_deadline(args.deadline) if args.deadline else None,
+        deadline=deadline,
         hours=args.hours,
         non_goals=args.non_goal or [],
         risks=args.risk or [],
@@ -285,8 +291,12 @@ def cmd_gate(args: argparse.Namespace) -> int:
     print()
     if g.ok:
         print(f"  {util.green('GATE GREEN')} — every criterion is proven with evidence.")
+    elif a["stats"]["criteria"] == 0:
+        print(f"  {util.red('GATE RED')} — the flight plan has no done-criteria."
+              f" {util.grey('add some: nsh done add \"...\" -- <command>')}")
     else:
-        print(f"  {util.red('GATE RED')} — do not call this done. {len(g.failures)} criterion(a) unproven.")
+        print(f"  {util.red('GATE RED')} — do not call this done."
+              f" {util.plural(len(g.failures), 'criterion', 'criteria')} unproven.")
     print()
     return 0 if g.ok else 1
 
