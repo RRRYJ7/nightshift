@@ -2,7 +2,8 @@
 
 # Evidence files are hashed. Any newline translation changes the bytes and
 # breaks every digest in the log, so git must treat them as opaque blobs.
-.nightshift/evidence/** -text
+# `**/` so this also covers example projects that carry their own .nightshift.
+**/.nightshift/evidence/** -text
 *.png binary
 *.gif binary
 *.mp4 binary

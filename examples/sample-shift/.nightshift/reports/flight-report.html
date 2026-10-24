@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>NIGHTSHIFT · flight report · sample-shift</title>
+<style>
+:root{
+  --ink:#0f172a; --muted:#64748b; --line:#e2e8f0; --paper:#ffffff; --wash:#f8fafc;
+  --cyan:#0891b2; --green:#059669; --amber:#d97706; --red:#dc2626;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--wash);color:var(--ink);
+  font:15px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei",Roboto,Helvetica,Arial,sans-serif}
+.wrap{max-width:1000px;margin:0 auto;padding:32px 20px 64px}
+header{border-radius:18px;padding:26px 28px;background:linear-gradient(135deg,#0f172a 0%,#164e63 100%);color:#e2e8f0}
+header h1{margin:0 0 4px;font-size:20px;letter-spacing:.14em;text-transform:uppercase;color:#67e8f9;font-weight:700}
+header .goal{font-size:22px;line-height:1.35;font-weight:650;color:#fff;margin:6px 0 14px}
+header .meta{font-size:12.5px;color:#94a3b8;display:flex;gap:18px;flex-wrap:wrap}
+.badge{display:inline-block;padding:4px 12px;border-radius:999px;font-size:12px;font-weight:700;letter-spacing:.06em}
+.badge.good{background:#064e3b;color:#6ee7b7;border:1px solid #059669}
+.badge.warn{background:#451a03;color:#fcd34d;border:1px solid #d97706}
+.badge.bad{background:#450a0a;color:#fca5a5;border:1px solid #dc2626}
+section{margin-top:26px}
+h2{font-size:13px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin:0 0 10px;font-weight:700}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:18px 20px}
+pre.brief{margin:0;font:13px/1.75 ui-monospace,SFMono-Regular,Consolas,"Cascadia Mono",monospace;
+  white-space:pre-wrap;color:#0f172a}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px}
+.stat{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:14px 16px}
+.stat .k{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.stat .v{font-size:26px;font-weight:750;margin-top:2px}
+.stat .s{font-size:12px;color:var(--muted)}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+th{text-align:left;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);
+  border-bottom:1px solid var(--line);padding:8px 10px;font-weight:600}
+td{border-bottom:1px solid var(--line);padding:10px;vertical-align:top}
+tr:last-child td{border-bottom:none}
+code,.mono{font-family:ui-monospace,SFMono-Regular,Consolas,"Cascadia Mono",monospace;font-size:12.5px}
+.ok{color:var(--green);font-weight:700}
+.no{color:var(--red);font-weight:700}
+.pill{display:inline-block;padding:1px 8px;border-radius:999px;font-size:11px;font-weight:700}
+.pill.high{background:#fee2e2;color:#991b1b}
+.pill.medium{background:#fef3c7;color:#92400e}
+.pill.low{background:#e0f2fe;color:#075985}
+.finding{border-left:3px solid var(--amber);padding:8px 0 8px 14px;margin:10px 0}
+.finding.high{border-left-color:var(--red)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:760px){.grid2{grid-template-columns:1fr}}
+.empty{color:var(--muted);font-style:italic}
+@media print{body{background:#fff}.wrap{max-width:none}section{break-inside:avoid}}
+footer{margin-top:34px;font-size:12px;color:var(--muted);text-align:center;line-height:1.9}
+.tag{font-size:11px;color:var(--muted);border:1px solid var(--line);border-radius:6px;padding:1px 6px}
+</style></head>
+<body><div class="wrap">
+
+<header>
+  <h1>Nightshift · Flight report</h1>
+  <div class="goal">make slugify survive unicode input without losing its punctuation rules</div>
+  <div class="meta">
+    <span class="badge good">DONE &amp; PROVEN</span>
+    <span>all 2 done-criteria passed with evidence</span>
+    <span>03:16 → 04:16</span>
+    <span>sample-shift</span>
+  </div>
+</header>
+
+<section>
+  <h2>Wake-up brief</h2>
+  <div class="card"><pre class="brief">GOAL     make slugify survive unicode input without losing its punctuation rules
+WINDOW   10s used · 59m48s left
+ACTIVITY 2 steps · 2 checks · 2 checkpoints · 4 pieces of evidence
+EVIDENCE 100% of steps carry proof (2/2)
+GATE     GREEN · 2/2 criteria proven
+RISK     no structural drift flags
+TREND    unknown - log checkpoints with --progress to unlock convergence detection</pre></div>
+</section>
+
+<section>
+  <h2>At a glance</h2>
+  <div class="cards"><div class="stat"><div class="k">window used</div><div class="v">10s</div><div class="s">of 59m59s</div></div><div class="stat"><div class="k">steps</div><div class="v">2</div><div class="s">2 checks · 2 checkpoints</div></div><div class="stat"><div class="k">evidence coverage</div><div class="v">100%</div><div class="s">2/2 steps carry proof</div></div><div class="stat"><div class="k">criteria proven</div><div class="v">2/2</div><div class="s">gate green</div></div></div>
+</section>
+
+<section>
+  <h2>Black box · 7 events</h2>
+  <div class="card"><svg viewBox="0 0 920 140" width="100%" height="140" role="img"><line x1="8" y1="116" x2="912" y2="116" stroke="#e2e8f0" stroke-width="2"/><line x1="8.0" y1="106" x2="8.0" y2="116" stroke="#94a3b8" stroke-width="2"/><line x1="8.0" y1="116" x2="8.0" y2="106.0" stroke="#0f172a" stroke-width="1.6" stroke-opacity="0.45"><title>python -m unittest -q</title></line><circle cx="98.4" cy="86.0" r="4" fill="#0891b2"><title>checkpoint read the failing test; the regex drops every non-ascii letter</title></circle><line x1="98.4" y1="91.0" x2="98.4" y2="116" stroke="#0891b2" stroke-opacity="0.3"/><line x1="821.6" y1="116" x2="821.6" y2="106.0" stroke="#0f172a" stroke-width="1.6" stroke-opacity="0.45"><title>replace the ascii regex with an isalnum() scan</title></line><circle cx="821.6" cy="86.0" r="4" fill="#0891b2"><title>checkpoint green: unicode kept, separators collapsed, ends trimmed</title></circle><line x1="821.6" y1="91.0" x2="821.6" y2="116" stroke="#0891b2" stroke-opacity="0.3"/><rect x="908.0" y="90.0" width="8" height="8" fill="#059669" transform="rotate(45 912.0 94.0)"><title>check check d1: all five slugify tests pass</title></rect><line x1="912.0" y1="100.0" x2="912.0" y2="116" stroke="#059669" stroke-opacity="0.35"/><rect x="908.0" y="90.0" width="8" height="8" fill="#059669" transform="rotate(45 912.0 94.0)"><title>check check d2: the module still imports</title></rect><line x1="912.0" y1="100.0" x2="912.0" y2="116" stroke="#059669" stroke-opacity="0.35"/></svg>
+    <div style="font-size:12px;color:#94a3b8;margin-top:8px">
+      ticks = steps · diamonds = checks · circles = checkpoints · red pins = drift flags
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>Proven</h2>
+  <div class="card"><table>
+    <tr><th>ID</th><th>Done-criterion</th><th>Result</th><th>Evidence (digest)</th></tr>
+    <tr><td class="mono">d1</td><td>all five slugify tests pass</td><td class="ok">PASS</td><td class="mono">cmd · cab661592b89</td></tr><tr><td class="mono">d2</td><td>the module still imports</td><td class="ok">PASS</td><td class="mono">cmd · 03221b079d48</td></tr>
+  </table></div>
+</section>
+
+<section>
+  <h2>Not proven — read this part even if it stings</h2>
+  <div class="card"><table>
+    <tr><th>ID</th><th>Done-criterion</th><th>Result</th><th>Why</th></tr>
+    <tr><td colspan="4" class="empty">none — every criterion is proven</td></tr>
+  </table></div>
+</section>
+
+<section>
+  <h2>Drift &amp; near-misses</h2>
+  <div class="card"><div class="empty">no drift flags — the log stayed on topic and every run of steps carried evidence</div></div>
+</section>
+
+<section class="grid2">
+  <div><h2>Convergence</h2><div class="card"><div class="empty">no progress checkpoints were logged</div></div></div>
+  <div><h2>Activity by hour</h2><div class="card"><svg viewBox="0 0 560 110" width="100%" height="110" role="img"><rect x="126.0" y="6.0" width="308.0" height="86.0" rx="2" fill="#0891b2" fill-opacity="0.85"><title>03:00: 7</title></rect><text x="280.0" y="105" font-size="9" fill="#94a3b8" text-anchor="middle">03:00</text></svg></div></div>
+</section>
+
+<section class="grid2">
+  <div><h2>Non-goals (respected?)</h2><div class="card"><ul style="margin:0;padding-left:18px"><li class='empty'>not declared</li></ul></div></div>
+  <div><h2>Known risks</h2><div class="card"><ul style="margin:0;padding-left:18px"><li class='empty'>not declared</li></ul></div></div>
+</section>
+
+<section>
+  <h2>Appendix · last 40 events</h2>
+  <div class="card"><table>
+    <tr><th>time</th><th>id</th><th>kind</th><th>intent</th><th>#ev</th></tr>
+    <tr><td class="mono">03:16:03</td><td class="mono">e000001</td><td>init</td><td>make slugify survive unicode input without losing its punctuation rules</td><td class="mono">0</td></tr><tr><td class="mono">03:16:03</td><td class="mono">e000002</td><td>step</td><td>python -m unittest -q</td><td class="mono">1</td></tr><tr><td class="mono">03:16:04</td><td class="mono">e000003</td><td>tick</td><td>read the failing test; the regex drops every non-ascii letter</td><td class="mono">0</td></tr><tr><td class="mono">03:16:12</td><td class="mono">e000004</td><td>step</td><td>replace the ascii regex with an isalnum() scan</td><td class="mono">1</td></tr><tr><td class="mono">03:16:12</td><td class="mono">e000005</td><td>tick</td><td>green: unicode kept, separators collapsed, ends trimmed</td><td class="mono">0</td></tr><tr><td class="mono">03:16:13</td><td class="mono">e000006</td><td>check</td><td>check d1: all five slugify tests pass</td><td class="mono">1</td></tr><tr><td class="mono">03:16:13</td><td class="mono">e000007</td><td>check</td><td>check d2: the module still imports</td><td class="mono">1</td></tr>
+  </table></div>
+</section>
+
+<footer>
+  Generated by <span class="mono">nightshift 0.1.0</span> at 2026-10-25T03:16:13+08:00<br>
+  This report is derived from an append-only log. Re-render it yourself:
+  <span class="mono">nsh report --html</span> — the digests above are sha256 of captured bytes.
+</footer>
+</div></body></html>

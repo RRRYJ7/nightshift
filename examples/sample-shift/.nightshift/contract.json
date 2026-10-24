@@ -1,0 +1,44 @@
+{
+  "v": 1,
+  "tool": "nightshift 0.1.0",
+  "goal": "make slugify survive unicode input without losing its punctuation rules",
+  "created_at": "2026-10-25T03:16:02+08:00",
+  "budget": {
+    "started_at": "2026-10-25T03:16:02+08:00",
+    "deadline": "2026-10-25T04:16:02+08:00",
+    "hours": 1.0
+  },
+  "done": [
+    {
+      "id": "d1",
+      "text": "all five slugify tests pass",
+      "cmd": [
+        "python",
+        "-m",
+        "unittest",
+        "-q"
+      ],
+      "evidence_hint": "",
+      "created_at": "2026-10-25T03:16:03+08:00"
+    },
+    {
+      "id": "d2",
+      "text": "the module still imports",
+      "cmd": [
+        "python",
+        "-c",
+        "import slugify; print('import ok')"
+      ],
+      "evidence_hint": "",
+      "created_at": "2026-10-25T03:16:03+08:00"
+    }
+  ],
+  "non_goals": [],
+  "risks": [],
+  "stop_conditions": [
+    "every done-criterion passes with evidence (gate is green)",
+    "budget is spent and the gate is red -> stop and report, do not fake it",
+    "the same blocker survives 3 checkpoints -> stop and report",
+    "three checkpoints in a row add no measurable improvement -> stop polishing"
+  ]
+}

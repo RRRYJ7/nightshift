@@ -1,0 +1,16 @@
+--- stderr ---
+======================================================================
+FAIL: test_keeps_unicode_letters (test_slugify.TestSlugify.test_keeps_unicode_letters)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\liuchao\Documents\deepseek-harness\default-workspace\nightshift\examples\sample-shift\test_slugify.py", line 18, in test_keeps_unicode_letters
+    self.assertEqual(slugify("锌碘电池"), "锌碘电池")
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: '' != '锌碘电池'
++ 锌碘电池
+
+
+----------------------------------------------------------------------
+Ran 5 tests in 0.004s
+
+FAILED (failures=1)
