@@ -11,14 +11,15 @@ the real, append-only log of the shift that fixed it — not a scripted demo:
 4. the second `nsh run`, green;
 5. two checkpoints, `nsh check --all`, `nsh gate`, `nsh verify`, `nsh report`.
 
-You can replay the whole thing:
+You can replay the whole thing — from the repository root, with no install:
 
 ```bash
-cd examples/sample-shift
-nsh verify                    # every digest still matches
-nsh report --open             # .nightshift/reports/flight-report.html
-nsh status                    # DONE & PROVEN, 2/2
+python -m nightshift --dir examples/sample-shift/.nightshift verify
+python -m nightshift --dir examples/sample-shift/.nightshift report --open
+python -m nightshift --dir examples/sample-shift/.nightshift status
 ```
+
+Or, if you installed the CLI, just `cd examples/sample-shift && nsh verify`.
 
 Or prove it from scratch — the log is append-only, so the failing run is still
 in there:

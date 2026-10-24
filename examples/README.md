@@ -3,8 +3,14 @@
 NIGHTSHIFT is not a coding tool. It is a **"done" tool**. Any goal you can
 express as "these commands must exit 0" fits.
 
-Three scenarios, each with the exact commands. The third one ships a runnable
-checker so you can try it in a minute.
+**[`sample-shift/`](sample-shift/)** is not a scenario — it is a real shift on a
+20-line module with a unicode bug, including the append-only log where the first
+test run exits 1 and the second exits 0. Start there if you want proof rather
+than a description.
+
+The three scenarios below show the same discipline on code, data and documents.
+Each has the exact commands. The third ships a runnable checker so you can try
+it in a minute.
 
 ---
 
