@@ -416,7 +416,7 @@ def cmd_log(args: argparse.Namespace) -> int:
 def cmd_doctor(args: argparse.Namespace) -> int:
     _head("doctor", f"nightshift {__version__} · python {sys.version.split()[0]}")
     checks = [
-        ("python >= 3.9", sys.version_info >= (3, 9)),
+        ("python >= 3.10", sys.version_info >= (3, 10)),
         ("utf-8 stdout", True),
         ("write access", _can_write(Path("."))),
         ("terminal supports ansi", util.color_enabled()),

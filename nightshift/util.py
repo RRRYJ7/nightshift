@@ -169,7 +169,24 @@ def iso(dt: datetime | None = None) -> str:
 
 
 def parse_iso(s: str) -> datetime:
-    dt = datetime.fromisoformat(s.replace("Z", "+00:00"))
+    """Parse a timestamp from a log that may have been written by another tool.
+
+    ``datetime.fromisoformat`` is strict: it rejects ``Z``, offsets without a
+    colon and fractional seconds that are not 3 or 6 digits. Normalise first
+    instead of failing on data we did not write.
+    """
+    if not isinstance(s, str) or not s.strip():
+        raise ValueError(f"empty timestamp: {s!r}")
+    text = s.strip()
+    if text.endswith("Z") or text.endswith("z"):
+        text = text[:-1] + "+00:00"
+    m = re.search(r"([+-]\d{2})(\d{2})$", text)
+    if m:
+        text = text[: m.start()] + m.group(1) + ":" + m.group(2)
+    m = re.search(r"\.(\d+)(?=[+-]|$)", text)
+    if m:
+        text = text[: m.start()] + "." + (m.group(1) + "000000")[:6] + text[m.end():]
+    dt = datetime.fromisoformat(text)
     if dt.tzinfo is None:
         dt = dt.astimezone()
     return dt
@@ -179,9 +196,15 @@ def parse_deadline(s: str, base: datetime | None = None) -> datetime:
     """Accept ``10:30``, ``2026-10-25 10:30``, ``2026-10-25T10:30`` or ISO with offset."""
     s = s.strip()
     base = base or now()
+
+    def _bad(why: str) -> ValueError:
+        return ValueError(f"cannot parse deadline {s!r}: {why} (try '2026-10-25 10:30' or '10:30')")
+
     m = re.fullmatch(r"(\d{1,2}):(\d{2})(?::(\d{2}))?", s)
     if m:
         hh, mm, ss = int(m.group(1)), int(m.group(2)), int(m.group(3) or 0)
+        if not (0 <= hh <= 23 and 0 <= mm <= 59 and 0 <= ss <= 59):
+            raise _bad("time out of range")
         cand = base.replace(hour=hh, minute=mm, second=ss, microsecond=0)
         if cand <= base:
             cand += timedelta(days=1)
@@ -189,11 +212,16 @@ def parse_deadline(s: str, base: datetime | None = None) -> datetime:
     m = re.fullmatch(r"(\d{4})-(\d{1,2})-(\d{1,2})[ T](\d{1,2}):(\d{2})(?::(\d{2}))?", s)
     if m:
         y, mo, d, hh, mm, ss = (int(x or 0) for x in m.groups())
-        return base.replace(year=y, month=mo, day=d, hour=hh, minute=mm, second=ss, microsecond=0)
+        if not (1 <= mo <= 12 and 1 <= d <= 31 and 0 <= hh <= 23 and 0 <= mm <= 59 and 0 <= ss <= 59):
+            raise _bad("date or time out of range")
+        try:
+            return base.replace(year=y, month=mo, day=d, hour=hh, minute=mm, second=ss, microsecond=0)
+        except ValueError as exc:  # e.g. 2026-02-30
+            raise _bad(str(exc))
     try:
         return parse_iso(s)
     except ValueError:
-        raise ValueError(f"cannot parse deadline {s!r} (try '2026-10-25 10:30' or '10:30')")
+        raise _bad("unrecognised format")
 
 
 def human_dur(seconds: float) -> str:

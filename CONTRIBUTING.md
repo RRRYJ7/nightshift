@@ -50,7 +50,7 @@ python -m nightshift demo --open
 python tools/check_docs.py
 ```
 
-No dependencies, no build step. Python 3.9+.
+No dependencies, no build step. Python 3.10+.
 
 ## Style
 

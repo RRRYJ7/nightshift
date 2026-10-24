@@ -10,7 +10,7 @@ something a human can audit in five minutes.
 </p>
 
 <p>
-<img alt="python" src="https://img.shields.io/badge/python-3.9%2B-0b7285">
+<img alt="python" src="https://img.shields.io/badge/python-3.10%2B-0b7285">
 <img alt="deps" src="https://img.shields.io/badge/dependencies-zero-0b7285">
 <img alt="license" src="https://img.shields.io/badge/license-MIT-0b7285">
 <img alt="skill" src="https://img.shields.io/badge/skill-Claude%20Code%20%7C%20Codex%20%7C%20Cursor%20%7C%20DSH-0b7285">
@@ -187,7 +187,7 @@ Three caveats, all printed by the tool itself:
 
 ## Design notes
 
-- **Zero dependencies.** Python 3.9+, standard library only. It has to run in
+- **Zero dependencies.** Python 3.10+, standard library only. It has to run in
   whatever container your agent woke up in.
 - **Append-only.** The log can be added to, never edited. Corrections are new
   events, not rewrites.

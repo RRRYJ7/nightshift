@@ -7,7 +7,7 @@ name = "nightshift-agent"
 version = "0.1.0"
 description = "Run an AI agent through a long unattended shift, then wake up to a flight report you can actually trust."
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 license = { text = "MIT" }
 authors = [{ name = "Charles", email = "mrliuchaochao@outlook.com" }]
 keywords = ["ai-agent", "claude-code", "codex", "autonomous-agents", "skill", "evals"]

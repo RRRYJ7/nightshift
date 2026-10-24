@@ -87,8 +87,12 @@ def model(analysis: dict[str, Any], project: str = "") -> dict[str, Any]:
     findings = [f.as_dict() if hasattr(f, "as_dict") else dict(f) for f in analysis["findings"]]
     conv = analysis["convergence"]
     window = ""
-    if stats["deadline"]:
-        window = f"{util.clock(util.parse_iso(stats['started_at']))} → {util.clock(util.parse_iso(stats['deadline']))}"
+    if stats.get("deadline") and stats.get("started_at"):
+        try:
+            window = "%s → %s" % (util.clock(util.parse_iso(stats["started_at"])),
+                                  util.clock(util.parse_iso(stats["deadline"])))
+        except (ValueError, TypeError):
+            window = ""
     return {
         "project": project or "night shift",
         "goal": contract.get("goal", ""),
@@ -180,7 +184,7 @@ def render_html(m: dict[str, Any]) -> str:
 
     rows = []
     for ev in m["events"][-40:]:
-        ts = ev.get("ts", "")[11:19]
+        ts = str(ev.get("ts") or "")[11:19]
         evn = len(ev.get("evidence") or [])
         rows.append(
             f'<tr><td class="mono">{_e(ts)}</td><td class="mono">{_e(ev.get("id", ""))}</td>'
@@ -352,5 +356,7 @@ def write_report(store, analysis: dict[str, Any], *, fmt: str = "html",
     path = Path(out)
     path.parent.mkdir(parents=True, exist_ok=True)
     text = render_html(m) if fmt == "html" else render_md(m)
-    path.write_text(text, encoding="utf-8", newline="\n")
+    # open() rather than Path.write_text(newline=...): keep one code path for 3.10+
+    with open(path, "w", encoding="utf-8", newline="\n") as fh:
+        fh.write(text)
     return path

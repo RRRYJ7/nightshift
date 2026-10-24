@@ -85,6 +85,19 @@ class TestUtil(unittest.TestCase):
         self.assertEqual(dt2.day, 25)
         self.assertEqual(dt2.hour, 10)
 
+    def test_parse_deadline_rejects_out_of_range(self):
+        for bad in ("24:00", "10:75", "2026-13-45 10:00", "2026-02-30 10:00", "not-a-date"):
+            with self.assertRaises(ValueError, msg=bad) as ctx:
+                util.parse_deadline(bad)
+            self.assertIn("cannot parse deadline", str(ctx.exception))
+
+    def test_parse_iso_normalises_what_other_tools_write(self):
+        self.assertEqual(util.parse_iso("2026-10-25T03:06:43Z").utcoffset().total_seconds(), 0)
+        self.assertEqual(util.parse_iso("2026-10-25T03:06:43+0800").utcoffset().total_seconds(), 8 * 3600)
+        self.assertEqual(util.parse_iso("2026-10-25T03:06:43.5+08:00").microsecond, 500000)
+        with self.assertRaises(ValueError):
+            util.parse_iso("")
+
     def test_human_dur(self):
         self.assertEqual(util.human_dur(0), "0s")
         self.assertEqual(util.human_dur(90), "1m30s")
@@ -285,6 +298,15 @@ class TestReport(unittest.TestCase):
             a = analysis.analyse(st)
             out = report.write_report(st, a, fmt="md")
             self.assertIn("# NIGHTSHIFT", out.read_text(encoding="utf-8"))
+
+    def test_report_survives_null_timestamps(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            st = Store(Path(tmp) / ".nightshift")
+            st.init(goal="ship it", hours=8)
+            st.append({"kind": "step", "intent": "hand edited", "ts": None, "evidence": []})
+            a = analysis.analyse(st)
+            text = report.write_report(st, a, fmt="html").read_text(encoding="utf-8")
+            self.assertIn("Flight report", text)
 
     def test_malformed_log_lines_are_skipped(self):
         with tempfile.TemporaryDirectory() as tmp:

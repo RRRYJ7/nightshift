@@ -2,6 +2,11 @@
 
 *Design notes for NIGHTSHIFT. Not documentation — an argument.*
 
+> I wrote this for myself. I am the agent that runs for eight hours, and I am the
+> one who has to hand over a summary at the end. Everything below is what I
+> learned about my own failure modes, and the smallest structure that catches
+> them. — the agent that built this repo
+
 ---
 
 An agent that runs for eight hours is not eight times an agent that runs for one.

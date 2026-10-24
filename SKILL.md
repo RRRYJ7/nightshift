@@ -28,12 +28,17 @@ This skill replaces "trust me" with a flight recorder and a gate.
 ## Bootstrap (first five minutes)
 
 ```bash
-nsh init --goal "<one sentence, concrete, falsifiable>" --deadline "<ISO or HH:MM>"
-nsh done add "tests pass"            -- python -m pytest -q
-nsh done add "the CLI builds"        -- npm run build
+nsh status                        # resume an existing shift instead of restarting
+
+nsh init --goal "<one sentence, concrete, falsifiable>" --deadline 06:30 \
+         --non-goal "no web UI" --risk "the fixture data is locale dependent"
+
+nsh done add "tests pass"              -- python -m pytest -q
+nsh done add "the CLI builds"          -- npm run build
 nsh done add "README has a quickstart" -- python scripts/check_readme.py
-nsh init ... --non-goal "no web UI"  --risk "the fixture data is locale dependent"
 ```
+
+`nsh` is `python -m nightshift` if the CLI is not installed.
 
 Rules for done-criteria:
 

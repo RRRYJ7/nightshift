@@ -165,11 +165,15 @@ def timeline(
         f'<line x1="8" y1="{base_y}" x2="{width - 8}" y2="{base_y}" stroke="{GRID}" stroke-width="2"/>'
     ]
 
-    # hour grid
-    cursor = t0.replace(minute=0, second=0, microsecond=0)
+    # hour grid, capped: a log with a bogus timestamp years away must not emit
+    # one node per hour.
     from datetime import timedelta as _td
 
-    while cursor <= t1:
+    span_hours = max(1.0, span / 3600.0)
+    step_hours = max(1, int(span_hours // 12) or 1)
+    cursor = t0.replace(minute=0, second=0, microsecond=0)
+    guard = 0
+    while cursor <= t1 and guard < 60:
         if cursor >= t0:
             x = x_of(cursor)
             parts.append(
@@ -178,7 +182,8 @@ def timeline(
                 f'<text x="{x:.1f}" y="{height - 7}" font-size="10" fill="{GREY}" '
                 f'text-anchor="middle">{cursor.strftime("%H:%M")}</text>'
             )
-        cursor += _td(hours=1)
+        cursor += _td(hours=step_hours)
+        guard += 1
 
     for ev, t in zip(events, times):
         x = x_of(t)
