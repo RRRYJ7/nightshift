@@ -1,9 +1,9 @@
 # NIGHTSHIFT
 
-**Give your coding agent a night shift. Wake up to a flight report, not a fantasy.**
+**Give your agent a night shift. Wake up to a flight report, not a fantasy.**
 
-A skill + a zero-dependency CLI that turns a long unattended agent run into
-something a human can audit in five minutes.
+A skill + a zero-dependency CLI that turns a long unattended run — code, data,
+documents — into something a human can audit in five minutes.
 
 <p align="center">
   <img src="docs/demo.gif" alt="a real NIGHTSHIFT session: init, a failing check, a fix, a green gate, a brief" width="820">
