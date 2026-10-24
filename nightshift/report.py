@@ -17,7 +17,7 @@ CSS = """
   --cyan:#0891b2; --green:#059669; --amber:#d97706; --red:#dc2626;
 }
 *{box-sizing:border-box}
-body{margin:0;background:var(--wash);color:var(--ink);
+body{margin:0;background:var(--wash);color:var(--ink);overflow-x:hidden;
   font:15px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei",Roboto,Helvetica,Arial,sans-serif}
 .wrap{max-width:1000px;margin:0 auto;padding:32px 20px 64px}
 header{border-radius:18px;padding:26px 28px;background:linear-gradient(135deg,#0f172a 0%,#164e63 100%);color:#e2e8f0}
@@ -30,18 +30,19 @@ header .meta{font-size:12.5px;color:#94a3b8;display:flex;gap:18px;flex-wrap:wrap
 .badge.bad{background:#450a0a;color:#fca5a5;border:1px solid #dc2626}
 section{margin-top:26px}
 h2{font-size:13px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin:0 0 10px;font-weight:700}
-.card{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:18px 20px}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:18px 20px;overflow-x:auto}
 pre.brief{margin:0;font:13px/1.75 ui-monospace,SFMono-Regular,Consolas,"Cascadia Mono",monospace;
-  white-space:pre-wrap;color:#0f172a}
+  white-space:pre-wrap;overflow-wrap:anywhere;color:#0f172a}
 .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px}
 .stat{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:14px 16px}
 .stat .k{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
 .stat .v{font-size:26px;font-weight:750;margin-top:2px}
 .stat .s{font-size:12px;color:var(--muted)}
-table{width:100%;border-collapse:collapse;font-size:13.5px}
+table{width:100%;border-collapse:collapse;table-layout:fixed;font-size:13.5px}
+img,svg{max-width:100%}
 th{text-align:left;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);
   border-bottom:1px solid var(--line);padding:8px 10px;font-weight:600}
-td{border-bottom:1px solid var(--line);padding:10px;vertical-align:top}
+td{border-bottom:1px solid var(--line);padding:10px;vertical-align:top;overflow-wrap:anywhere}
 tr:last-child td{border-bottom:none}
 code,.mono{font-family:ui-monospace,SFMono-Regular,Consolas,"Cascadia Mono",monospace;font-size:12.5px}
 .ok{color:var(--green);font-weight:700}
