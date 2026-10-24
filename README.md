@@ -95,6 +95,10 @@ nsh report      # .nightshift/reports/flight-report.html
 nsh brief       # the ten lines above
 ```
 
+New here and want to see one whole shift before installing anything? Read
+[`docs/WALKTHROUGH.md`](docs/WALKTHROUGH.md) — one night, real command output,
+five minutes.
+
 ## Install the skill (so the agent does this by itself)
 
 The CLI is half of it. The other half is `SKILL.md`, which tells the agent the

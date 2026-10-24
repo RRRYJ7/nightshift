@@ -18,6 +18,7 @@ REQUIRED = [
     ("docs/PROTOCOL.md", 3000, ["events.jsonl", "gate", "Threat model"]),
     ("docs/WHY.md", 2000, ["receipts", "gate"]),
     ("docs/BENCHMARKS.md", 1500, ["precision", "false negative"]),
+    ("docs/WALKTHROUGH.md", 2500, ["nsh gate", "nsh verify"]),
     ("CONTRIBUTING.md", 500, ["bench/cases"]),
     ("LICENSE", 1000, ["MIT License"]),
     ("install.sh", 200, ["nsh init"]),

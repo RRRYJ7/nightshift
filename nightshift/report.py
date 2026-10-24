@@ -55,6 +55,7 @@ code,.mono{font-family:ui-monospace,SFMono-Regular,Consolas,"Cascadia Mono",mono
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
 @media(max-width:760px){.grid2{grid-template-columns:1fr}}
 .empty{color:var(--muted);font-style:italic}
+@media print{body{background:#fff}.wrap{max-width:none}section{break-inside:avoid}}
 footer{margin-top:34px;font-size:12px;color:var(--muted);text-align:center;line-height:1.9}
 .tag{font-size:11px;color:var(--muted);border:1px solid var(--line);border-radius:6px;padding:1px 6px}
 """
