@@ -43,7 +43,7 @@ jobs:
 
       - name: render the flight report
         if: always()
-        run: nsh report --md
+        run: nsh report --md --github-summary
 
       - name: upload the report and the black box
         if: always()

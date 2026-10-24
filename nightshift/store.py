@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import os
 import subprocess
+import tempfile
 import time
 from pathlib import Path
 from typing import Any, Sequence
@@ -50,36 +51,54 @@ def run_capture(
     cmd: Sequence[str],
     cwd: str | os.PathLike | None = None,
     timeout: int = 1800,
+    max_bytes: int = MAX_CAPTURE,
 ) -> dict[str, Any]:
-    """Run *cmd*, return exit code, duration and combined output."""
+    """Run *cmd*, return exit code, duration and (capped) output.
+
+    Output goes to temporary files rather than pipes, so a runaway command that
+    prints gigabytes cannot exhaust this process's memory. Only the first
+    *max_bytes* of each stream is read back.
+    """
     cmd = [str(x) for x in cmd]
     t0 = time.monotonic()
     timed_out = False
+    out_tmp = tempfile.TemporaryFile()
+    err_tmp = tempfile.TemporaryFile()
     try:
-        cp = subprocess.run(
-            cmd,
-            cwd=str(cwd) if cwd else None,
-            capture_output=True,
-            timeout=timeout,
-        )
-        code, out, err = cp.returncode, cp.stdout or b"", cp.stderr or b""
-    except FileNotFoundError:
-        return {
-            "cmd": cmd,
-            "exit": 127,
-            "ms": int((time.monotonic() - t0) * 1000),
-            "text": f"command not found: {cmd[0] if cmd else ''}",
-            "timed_out": False,
-        }
-    except subprocess.TimeoutExpired as exc:
-        code, out, err = 124, exc.stdout or b"", exc.stderr or b""
-        timed_out = True
+        try:
+            cp = subprocess.run(cmd, cwd=str(cwd) if cwd else None,
+                                stdout=out_tmp, stderr=err_tmp, timeout=timeout)
+            code = cp.returncode
+        except FileNotFoundError:
+            return {
+                "cmd": cmd,
+                "exit": 127,
+                "ms": int((time.monotonic() - t0) * 1000),
+                "text": f"command not found: {cmd[0] if cmd else ''}",
+                "timed_out": False,
+                "capped": False,
+            }
+        except subprocess.TimeoutExpired:
+            code, timed_out = 124, True
 
-    text = _decode(out)
-    if err.strip():
-        text += ("\n" if text else "") + "--- stderr ---\n" + _decode(err)
+        out_tmp.seek(0)
+        err_tmp.seek(0)
+        out = out_tmp.read(max_bytes + 1)
+        err = err_tmp.read(max_bytes + 1)
+    finally:
+        out_tmp.close()
+        err_tmp.close()
+
+    capped = len(out) > max_bytes or len(err) > max_bytes
+    text = _decode(out[:max_bytes])
+    err_text = _decode(err[:max_bytes])
+    if err_text.strip():
+        text += ("\n" if text else "") + "--- stderr ---\n" + err_text
+    if capped:
+        text += "\n... [output capped at %d bytes per stream]" % max_bytes
     ms = int((time.monotonic() - t0) * 1000)
-    return {"cmd": cmd, "exit": code, "ms": ms, "text": text, "timed_out": timed_out}
+    return {"cmd": cmd, "exit": code, "ms": ms, "text": text,
+            "timed_out": timed_out, "capped": capped}
 
 
 # --------------------------------------------------------------------------- #
@@ -227,18 +246,31 @@ class Store:
     # -- evidence ------------------------------------------------------------
 
     def save_evidence(self, text: str, kind: str = "cmd", label: str = "") -> dict[str, Any]:
+        """Store captured bytes and hash *exactly what was stored*.
+
+        The digest must match the file on disk, otherwise "replay the receipt"
+        is a promise the tool cannot keep. When output is longer than the cap we
+        say so in the file and record the original size separately.
+        """
         self.evidence_dir.mkdir(parents=True, exist_ok=True)
+        raw_bytes = len(text.encode("utf-8", "replace"))
+        truncated = raw_bytes > MAX_CAPTURE
+        if truncated:
+            text = text[:MAX_CAPTURE] + f"\n... [truncated, {raw_bytes} bytes total]"
         dig = util.digest(text)
-        if len(text) > MAX_CAPTURE:
-            text = text[:MAX_CAPTURE] + f"\n... [truncated, {len(text)} chars total]"
         name = f"{int(time.time() * 1000)}-{dig[7:15]}.txt"
         path = self.evidence_dir / name
-        path.write_text(text, encoding="utf-8", errors="replace")
+        # write bytes, not text: Windows newline translation would change the
+        # bytes and break "the digest matches the file".
+        data = text.encode("utf-8", "replace")
+        path.write_bytes(data)
         return {
             "kind": kind,
             "ref": path.relative_to(self.root).as_posix(),
             "digest": dig,
-            "bytes": len(text.encode("utf-8", "replace")),
+            "bytes": len(data),
+            "bytes_total": raw_bytes,
+            "truncated": truncated,
             "label": label,
         }
 

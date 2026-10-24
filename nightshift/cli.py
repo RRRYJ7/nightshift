@@ -145,15 +145,16 @@ def cmd_run(args: argparse.Namespace) -> int:
     if not cmd:
         raise NightshiftError("nothing to run: nsh run -- <command>")
     res = run_capture(cmd, timeout=args.timeout)
+    saved = st.save_evidence(res["text"], kind="cmd", label=" ".join(cmd))
     ev_item = {
         "kind": "cmd",
-        "ref": "$ " + " ".join(cmd),
-        "digest": util.digest(res["text"]),
-        "bytes": len(res["text"].encode("utf-8", "replace")),
-        "label": f"exit {res['exit']} · {res['ms']}ms",
+        "ref": saved["ref"],
+        "digest": saved["digest"],
+        "bytes": saved["bytes"],
+        "bytes_total": saved.get("bytes_total"),
+        "truncated": saved.get("truncated", False),
+        "label": f"exit {res['exit']} · {res['ms']}ms" + (" · capped" if res.get("capped") else ""),
     }
-    saved = st.save_evidence(res["text"], kind="cmd", label=" ".join(cmd))
-    ev_item["ref"] = saved["ref"]
     ev = st.append({
         "kind": "step",
         "intent": (args.intent or " ".join(cmd)),
@@ -369,6 +370,21 @@ def cmd_report(args: argparse.Namespace) -> int:
         paths.append(p)
     for p in paths:
         print(f"  {util.green('✓')} wrote {p}" + f"  {util.grey(f'({p.stat().st_size} bytes)')}")
+
+    if args.print_md or args.github_summary:
+        md = report.render_md(report.model(a, project=args.project))
+        if args.print_md:
+            print()
+            print(md)
+        if args.github_summary:
+            summary = os.environ.get("GITHUB_STEP_SUMMARY")
+            if summary:
+                with open(summary, "a", encoding="utf-8") as fh:
+                    fh.write(md + "\n")
+                print(f"  {util.green('✓')} appended to $GITHUB_STEP_SUMMARY")
+            else:
+                print(f"  {util.yellow('!')} --github-summary set but $GITHUB_STEP_SUMMARY is empty")
+
     if args.open and paths and os.name == "nt":
         try:
             os.startfile(paths[0])  # type: ignore[attr-defined]
@@ -514,6 +530,9 @@ def build_parser() -> argparse.ArgumentParser:
     q.add_argument("--out")
     q.add_argument("--out-md")
     q.add_argument("--project", default="")
+    q.add_argument("--print", dest="print_md", action="store_true", help="print the markdown to stdout")
+    q.add_argument("--github-summary", action="store_true",
+                   help="append the markdown to $GITHUB_STEP_SUMMARY (for CI)")
     q.add_argument("--open", action="store_true")
     q.set_defaults(func=cmd_report)
 

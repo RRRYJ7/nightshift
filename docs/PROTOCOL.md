@@ -119,10 +119,12 @@ An evidence item is a claim about bytes.
 | `url` | a URL | no |
 | `note` | a path to typed text | **no** |
 
-- `digest` is `sha256:<hex>` of the captured bytes, computed **before**
-  truncation, stored after.
-- Captured output is truncated to 64 KiB on disk; the digest still refers to the
-  full byte stream as captured.
+- `digest` is `sha256:<hex>` of **the bytes stored on disk**, so anyone can
+  recompute it from `ref` and check it. Truncation happens *before* hashing.
+- When the captured stream was longer than the 64 KiB cap the file says so,
+  `truncated: true` is set, and `bytes_total` records the original size. The
+  digest still describes the stored file — a receipt you cannot verify is not a
+  receipt.
 - Evidence is written at **action time**. Evidence reconstructed after the fact
   is indistinguishable from a forgery, so the protocol does not allow it: there
   is no command that attaches evidence to a past event.

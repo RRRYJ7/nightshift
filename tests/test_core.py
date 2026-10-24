@@ -219,6 +219,27 @@ class TestStore(unittest.TestCase):
             self.assertTrue(path.exists())
             self.assertEqual(path.read_text(encoding="utf-8"), "hello world\n")
 
+    def test_evidence_digest_matches_the_stored_bytes(self):
+        """The receipt has to be verifiable: hash what you saved, save what you hashed."""
+        import hashlib
+
+        with tempfile.TemporaryDirectory() as tmp:
+            st = Store(Path(tmp) / ".nightshift")
+            st.init(goal="x", hours=1)
+            item = st.save_evidence("line one\nline two\n", kind="cmd")
+            data = (st.root / item["ref"]).read_bytes()
+            self.assertEqual("sha256:" + hashlib.sha256(data).hexdigest(), item["digest"])
+            self.assertEqual(len(data), item["bytes"])
+
+    def test_huge_output_is_capped_not_buffered(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            st = Store(Path(tmp) / ".nightshift")
+            st.init(goal="x", hours=1)
+            item = st.save_evidence("A" * (store_mod.MAX_CAPTURE * 3), kind="cmd")
+            self.assertTrue(item["truncated"])
+            self.assertEqual(item["bytes_total"], store_mod.MAX_CAPTURE * 3)
+            self.assertLess(item["bytes"], store_mod.MAX_CAPTURE + 200)
+
     def test_init_twice_needs_force(self):
         with tempfile.TemporaryDirectory() as tmp:
             st = Store(Path(tmp) / ".nightshift")
@@ -244,6 +265,19 @@ class TestReport(unittest.TestCase):
             self.assertIn("GATE", text.upper())
             self.assertGreater(len(text), 5000)
 
+    def test_html_escapes_event_text(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            st = Store(Path(tmp) / ".nightshift")
+            st.init(goal="ship it <script>alert(1)</script>", hours=8)
+            st.add_done("tests", cmd=["true"])
+            st.append({"kind": "step", "intent": "<img src=x onerror=alert(1)>", "target": "\"><script>x</script>",
+                       "evidence": []})
+            a = analysis.analyse(st)
+            text = report.write_report(st, a, fmt="html").read_text(encoding="utf-8")
+            self.assertNotIn("<script>alert(1)</script>", text)
+            self.assertNotIn("<img src=x onerror", text)
+            self.assertIn("&lt;script&gt;", text)
+
     def test_markdown_renders(self):
         with tempfile.TemporaryDirectory() as tmp:
             st = Store(Path(tmp) / ".nightshift")
@@ -251,6 +285,17 @@ class TestReport(unittest.TestCase):
             a = analysis.analyse(st)
             out = report.write_report(st, a, fmt="md")
             self.assertIn("# NIGHTSHIFT", out.read_text(encoding="utf-8"))
+
+    def test_malformed_log_lines_are_skipped(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            st = Store(Path(tmp) / ".nightshift")
+            st.init(goal="ship it", hours=8)
+            st.append({"kind": "step", "intent": "one", "evidence": []})
+            with open(st.events_path, "a", encoding="utf-8") as fh:
+                fh.write("{this is not json}\n\n")
+            self.assertEqual(len(st.events()), 2)
+            a = analysis.analyse(st)  # must not raise
+            self.assertEqual(a["stats"]["actions"] if "actions" in a["stats"] else a["stats"]["events"], 2)
 
 
 # --------------------------------------------------------------------------- #
@@ -327,6 +372,17 @@ class TestCli(unittest.TestCase):
                       sys.executable, "-c", "import sys; sys.exit(3)")
             r = self._run(tmp, "check", "d1")
             self.assertEqual(r.returncode, 1)
+
+    def test_check_all_runs_every_criterion(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            self._run(tmp, "init", "--goal", "x", "--hours", "1")
+            for name in ("one", "two", "three"):
+                self._run(tmp, "done", "add", name, "--", sys.executable, "-c", "print('ok')")
+            r = self._run(tmp, "check", "--all")
+            self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+            self.assertEqual(r.stdout.count("PASS"), 3)
+            gate = self._run(tmp, "gate")
+            self.assertEqual(gate.returncode, 0, gate.stdout + gate.stderr)
 
     def test_run_captures_output_as_evidence(self):
         with tempfile.TemporaryDirectory() as tmp:
