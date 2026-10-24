@@ -149,29 +149,33 @@ the shift that built v0.1. Numbers are read straight out of it.
 
 ## Benchmarks, honestly
 
-`nsh bench` runs the drift detector over a labelled corpus of synthetic runs:
+`nsh bench` runs the detectors over a labelled corpus of synthetic runs:
 
 ```
-drift detector   precision 1.00   recall 0.86   f1 0.92
-gate             accuracy 1.00
-confusion        tp=6 fp=0 tn=8 fn=1
+structural drift  precision 1.00   recall 0.80   f1 0.89   (silent_run + churn)
+topical advisory  precision 1.00   recall 1.00   f1 1.00   (off_topic, low severity)
+gate              accuracy 1.00
+confusion         tp=4 fp=0 tn=10 fn=1
 ```
 
-Two caveats, both printed by the tool itself:
+Three caveats, all printed by the tool itself:
 
 - **The corpus is synthetic and labelled by construction.** These numbers are a
   regression test for the heuristics, not a scientific benchmark of real agents.
 - **There is one known false negative**: churn on a file you never passed to
   `--target` is invisible. The detector can only see what it was told.
-
-Details and failure modes: [`docs/BENCHMARKS.md`](docs/BENCHMARKS.md)
+- **One detector was demoted, not tuned.** The topical check first shipped as a
+  medium-severity flag, then fired on the very run that was building this repo.
+  We measured it, could not separate "legitimate new vocabulary" from "working
+  on something else", and made it advisory instead of guessing a threshold.
+  The numbers are in [`docs/BENCHMARKS.md`](docs/BENCHMARKS.md).
 
 ## What this is not
 
 - **Not an agent framework.** It does not run your agent. It watches it.
 - **Not an eval platform.** It does not score models. It scores one shift.
 - **Not a sandbox.** It records what happened; it does not stop you.
-- **Not magic.** The drift detector is five heuristics and a tokenizer. It is
+- **Not magic.** The drift detector is four heuristics and a tokenizer. It is
   wrong sometimes, and it says so in the report.
 
 ## Design notes

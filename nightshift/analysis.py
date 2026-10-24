@@ -217,10 +217,12 @@ def drift(contract: dict, events: Sequence[dict]) -> list[Finding]:
     if run >= SILENT_RUN_MEDIUM:
         findings.append(_silent_finding(run, worst, closed=False))
 
-    # -- D1: topical drift --------------------------------------------------
-    # containment (share of the step's words that appear in the flight plan)
-    # rather than jaccard: one short, on-topic intent must not be diluted by a
-    # long goal statement.
+    # -- D1: topical drift (advisory only) ----------------------------------
+    # Containment of the step's words in the flight plan's vocabulary. Measured
+    # on 15 labelled runs it could not separate "legitimate new vocabulary"
+    # from "working on something else" (0.10 vs 0.00, with clean runs at 0.16),
+    # so it is deliberately demoted to a low-severity hint and never counted as
+    # structural drift. See docs/BENCHMARKS.md.
     sims: list[tuple[dict, float]] = []
     # checkpoints are bookkeeping, not work: they must not drag the window down
     for ev in [e for e in steps if e.get("kind") == "step"]:
@@ -236,10 +238,11 @@ def drift(contract: dict, events: Sequence[dict]) -> list[Finding]:
             findings.append(
                 Finding(
                     "off_topic",
-                    "medium",
-                    "last %d steps barely overlap the flight plan (score %.3f)" % (DRIFT_WINDOW, mean),
-                    "recent intents: "
-                    + " / ".join(str(e.get("intent", ""))[:48] for e, _ in window[-3:]),
+                    "low",
+                    "plan overlap %.2f over the last %d steps" % (mean, DRIFT_WINDOW),
+                    "advisory, not a verdict: the words moved away from the flight plan. "
+                    "Confirm this is still the same task. Recent intents: "
+                    + " / ".join(str(e.get("intent", ""))[:44] for e, _ in window[-3:]),
                     at=ev.get("ts", ""),
                     ids=[e.get("id", "") for e, _ in window],
                 )
@@ -463,11 +466,12 @@ def brief(contract: dict, events: Sequence[dict], stats: dict, g: GateResult,
     if not g.ok and g.failures:
         gate_line += " - first blocker: " + util.one_line(g.failures[0]["why"], 46)
     lines.append(gate_line)
-    if findings:
-        top = sorted(findings, key=lambda f: {"high": 0, "medium": 1, "low": 2}[f.severity])[:2]
+    structural = [f for f in findings if f.severity in ("high", "medium")]
+    if structural:
+        top = sorted(structural, key=lambda f: {"high": 0, "medium": 1, "low": 2}[f.severity])[:2]
         lines.append("RISK     " + " | ".join("%s: %s" % (f.severity, util.one_line(f.title, 52)) for f in top))
     else:
-        lines.append("RISK     no drift flags")
+        lines.append("RISK     no structural drift flags")
     if conv.get("state") in ("plateau", "regressing"):
         lines.append("TREND    %s - %s" % (conv["state"], util.one_line(conv.get("why", ""), 62)))
     elif conv.get("state") == "improving":

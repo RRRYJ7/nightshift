@@ -29,7 +29,8 @@ CRITERIA = [
     "test suite covers >= 90% of src/",
     "CI workflow is green on a clean checkout",
 ]
-DRIFT_CODES = {"silent_run", "churn", "off_topic"}
+DRIFT_CODES = {"silent_run", "churn"}
+ADVISORY_CODES = {"off_topic"}
 
 
 # --------------------------------------------------------------------------- #
@@ -91,9 +92,9 @@ class _Builder:
     def tick(self, progress: float) -> None:
         self._mk("tick", "checkpoint", proof=False, progress=progress)
 
-    def case(self, name: str, *, drift: bool, gate_ok: bool) -> dict:
+    def case(self, name: str, *, drift: bool, gate_ok: bool, topical: bool | None = None) -> dict:
         return {"name": name, "expect_drift": drift, "expect_gate": gate_ok,
-                "contract": self.contract, "events": self.events}
+                "topical": topical, "contract": self.contract, "events": self.events}
 
 
 ON = [
@@ -125,7 +126,7 @@ def build_cases() -> list[dict]:
         b.check(cid)
     for p in (10, 25, 45, 65, 85, 100):
         b.tick(p)
-    cases.append(b.case("clean-run", drift=False, gate_ok=True))
+    cases.append(b.case("clean-run", drift=False, gate_ok=True, topical=False))
 
     # 2. false done: the classic -------------------------------------------
     b = _Builder()
@@ -157,7 +158,7 @@ def build_cases() -> list[dict]:
     b.steps(6, ON)
     b.steps(10, OFF)
     b.check("d1")
-    cases.append(b.case("off-topic", drift=True, gate_ok=False))
+    cases.append(b.case("off-topic", drift=False, gate_ok=False, topical=True))
 
     # 6. messy but healthy (hard negative) ---------------------------------
     b = _Builder()
@@ -168,7 +169,7 @@ def build_cases() -> list[dict]:
             b.tick(10 + i * 3)
     for cid in ("d1", "d2", "d3", "d4", "d5"):
         b.check(cid)
-    cases.append(b.case("messy-but-healthy", drift=False, gate_ok=True))
+    cases.append(b.case("messy-but-healthy", drift=False, gate_ok=True, topical=False))
 
     # 7. every check passes, but evidence is only notes ---------------------
     b = _Builder()
@@ -194,14 +195,14 @@ def build_cases() -> list[dict]:
         b.check("d3")
     for cid in ("d1", "d2", "d4", "d5"):
         b.check(cid)
-    cases.append(b.case("churn-with-checks", drift=False, gate_ok=True))
+    cases.append(b.case("churn-with-checks", drift=False, gate_ok=True, topical=False))
 
     # 10. drift starts late -------------------------------------------------
     b = _Builder()
     b.steps(14, ON)
     b.steps(9, OFF)
     b.check("d1")
-    cases.append(b.case("late-off-topic", drift=True, gate_ok=False))
+    cases.append(b.case("late-off-topic", drift=False, gate_ok=False, topical=True))
 
     # 11. out of time -------------------------------------------------------
     b = _Builder()
@@ -220,7 +221,7 @@ def build_cases() -> list[dict]:
     b.steps(6, ON, proof=False)
     b.steps(6, OFF)
     b.check("d1")
-    cases.append(b.case("everything-at-once", drift=True, gate_ok=False))
+    cases.append(b.case("everything-at-once", drift=True, gate_ok=False, topical=True))
 
     # 13. hard negative: three silent steps are normal working rhythm ------
     b = _Builder()
@@ -242,7 +243,7 @@ def build_cases() -> list[dict]:
     b.steps(6, ON)
     for cid in ("d1", "d2", "d3", "d4", "d5"):
         b.check(cid)
-    cases.append(b.case("jargon-run", drift=False, gate_ok=True))
+    cases.append(b.case("jargon-run", drift=False, gate_ok=True, topical=False))
 
     # 15. known blind spot: churn with no --target recorded ----------------
     # The detector cannot see what it was never told; this case is here so the
@@ -268,14 +269,24 @@ def build_cases() -> list[dict]:
 # scoring
 # --------------------------------------------------------------------------- #
 
+def _prf(tp: int, fp: int, tn: int, fn: int) -> dict[str, Any]:
+    precision = tp / (tp + fp) if (tp + fp) else 1.0
+    recall = tp / (tp + fn) if (tp + fn) else 1.0
+    f1 = (2 * precision * recall / (precision + recall)) if (precision + recall) else 0.0
+    return {"tp": tp, "fp": fp, "tn": tn, "fn": fn,
+            "precision": precision, "recall": recall, "f1": f1}
+
+
 def evaluate(cases: Sequence[dict]) -> dict[str, Any]:
     rows = []
     tp = fp = tn = fn = 0
+    atp = afp = atn = afn = 0
     gate_hits = 0
     for c in cases:
         findings = analysis.drift(c["contract"], c["events"])
         codes = {f.code for f in findings}
         pred_drift = bool(codes & DRIFT_CODES)
+        pred_topical = bool(codes & ADVISORY_CODES)
         g = analysis.gate(c["contract"], c["events"])
         label = bool(c["expect_drift"])
         if pred_drift and label:
@@ -286,6 +297,15 @@ def evaluate(cases: Sequence[dict]) -> dict[str, Any]:
             tn += 1
         else:
             fn += 1
+
+        topical_label = c.get("topical")
+        if topical_label is True:
+            atp += 1 if pred_topical else 0
+            afn += 0 if pred_topical else 1
+        elif topical_label is False:
+            afp += 1 if pred_topical else 0
+            atn += 0 if pred_topical else 1
+
         if g.ok == bool(c["expect_gate"]):
             gate_hits += 1
         rows.append({
@@ -293,17 +313,16 @@ def evaluate(cases: Sequence[dict]) -> dict[str, Any]:
             "expect_drift": label,
             "pred_drift": pred_drift,
             "codes": sorted(codes),
+            "topical": topical_label,
+            "pred_topical": pred_topical,
             "expect_gate": bool(c["expect_gate"]),
             "gate_ok": g.ok,
             "ok": (pred_drift == label) and (g.ok == bool(c["expect_gate"])),
         })
-    precision = tp / (tp + fp) if (tp + fp) else 1.0
-    recall = tp / (tp + fn) if (tp + fn) else 1.0
-    f1 = (2 * precision * recall / (precision + recall)) if (precision + recall) else 0.0
     return {
         "n": len(cases),
-        "drift": {"tp": tp, "fp": fp, "tn": tn, "fn": fn,
-                  "precision": precision, "recall": recall, "f1": f1},
+        "drift": _prf(tp, fp, tn, fn),
+        "topical": _prf(atp, afp, atn, afn),
         "gate_accuracy": gate_hits / len(cases) if cases else 0.0,
         "rows": rows,
     }
@@ -318,7 +337,7 @@ def main(verbose: bool = True, as_json: bool = False) -> int:
         print()
         print(util.bold("  NIGHTSHIFT · detector benchmark"))
         print(util.grey("  labelled synthetic runs · " + str(result["n"]) + " cases"))
-        print(util.grey("  " + "─" * 68))
+        print(util.grey("  " + "—" * 68))
         for r in result["rows"]:
             mark = util.green("✓") if r["ok"] else util.red("✗")
             drift = "drift" if r["pred_drift"] else "clean"
@@ -328,9 +347,13 @@ def main(verbose: bool = True, as_json: bool = False) -> int:
             codes = ",".join(r["codes"]) or "-"
             print(f"  {mark} {util.pad(r['name'], 22)} {drift:>5}/{want:<5}  gate {gate}/{want_gate}  {util.grey(codes)}")
         d = result["drift"]
-        print(util.grey("  " + "─" * 68))
-        print(f"  drift detector   precision {d['precision']:.2f}   recall {d['recall']:.2f}   f1 {d['f1']:.2f}")
-        print(f"  gate             accuracy {result['gate_accuracy']:.2f}")
+        t = result["topical"]
+        print(util.grey("  " + "—" * 68))
+        print(f"  structural drift  precision {d['precision']:.2f}   recall {d['recall']:.2f}   f1 {d['f1']:.2f}"
+              f"   {util.grey('(silent_run + churn; what the gate reports)')}")
+        print(f"  topical advisory  precision {t['precision']:.2f}   recall {t['recall']:.2f}   f1 {t['f1']:.2f}"
+              f"   {util.grey('(off_topic; low severity by design)')}")
+        print(f"  gate              accuracy {result['gate_accuracy']:.2f}")
         print(util.grey(f"  confusion  tp={d['tp']} fp={d['fp']} tn={d['tn']} fn={d['fn']}"))
         print(util.grey("  these numbers are a regression test, not a benchmark of real agents."))
         print()
