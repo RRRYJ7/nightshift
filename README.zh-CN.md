@@ -41,21 +41,29 @@ Agent 框架解决编排，评测平台解决离线打分。**没有人解决你
 | **检查点**：每约 45 分钟一次诚实进度 + 漂移检测 | 无声漂移、无限打磨 |
 | **收敛检测**：连续三次检查点没进展 = 该停 | 第七个小时的边际收益为负 |
 | **证据门**：`nsh gate` 只有在每条标准都**带证据**通过时才返回 0 | 靠气氛变绿 |
+| **证据校验**：`nsh verify` 重算每个摘要，篡改过的收据直接失败 | 从来没人核对过的"证据" |
 | **飞行报告**：单文件 HTML，强制包含 **"未证明"** 一栏 | 早上的惊吓 |
 
 ## 60 秒上手（不用 API key，不用起服务）
 
 ```bash
-git clone https://github.com/<you>/nightshift && cd nightshift
+git clone https://github.com/chchliu/nightshift && cd nightshift
 python -m nightshift demo --open
 ```
 
 它会现场造一次 7.5 小时的脚本化运行（真的黑匣子、真的证据文件、真的 sha256），
 然后打开飞行报告。**先读"未证明"那一栏**，那是重点。
 
-然后驱动你自己的夜班：
+再看一眼失败长什么样——这条比上一条更能说明问题：
 
 ```bash
+python -m nightshift demo --red --open    # 2 条没证明，门是红的
+```
+
+然后驱动你自己的夜班（下面的 `nsh` 是安装后的入口；没装就等于 `python -m nightshift`）：
+
+```bash
+pipx install .                           # 可选，给你一个 nsh
 nsh init --goal "把报表生成器做成 CLI，v0.1" --deadline "06:40"
 nsh done add "测试全绿"     -- python -m pytest -q
 nsh done add "能构建"       -- npm run build
@@ -66,6 +74,7 @@ nsh step "手写了开头那段" -e README.md
 nsh tick --progress 40 --note "解析器好了，下一步模板"
 
 nsh gate     # 只有每条标准都带证据通过才返回 0
+nsh verify   # 重算每个证据摘要，和磁盘上的字节比
 nsh report   # .nightshift/reports/flight-report.html
 nsh brief    # 上面那十行
 ```
@@ -103,22 +112,33 @@ Agent 自己写飞行计划、记收据、打检查点、留报告。
 
 ## 这个仓库就是它自己跑出来的
 
-`nightshift/.nightshift/` 里是构建 v0.1 这一夜的真实日志，只追加、没改过。
-所有数字直接从日志里读。
+`.nightshift/` 里是构建 v0.1 这一夜的真实日志，只追加、没改过：
+11 步、15 次检查、3 个检查点、31 条证据，5/5 条标准带证据通过。
+所有数字直接从日志里读，`python -m nightshift brief` 就是它们的出口。
+
+`examples/sample-shift/` 里还有一次**非脚本化**的真实班次：一个 20 行模块的
+unicode bug，日志里能翻到"第一次跑测试 exit 1、修完 exit 0"。
+
+想完整看一遍用起来是什么感觉：**[`docs/WALKTHROUGH.md`](docs/WALKTHROUGH.md)**。
 
 ## 基准测试，诚实版
 
 ```
-drift detector   precision 1.00   recall 0.86   f1 0.92
-gate             accuracy 1.00
-confusion        tp=6 fp=0 tn=8 fn=1
+structural drift  precision 1.00   recall 0.80   f1 0.89   (silent_run + churn)
+topical advisory  precision 0.75   recall 1.00   f1 0.86   (off_topic，低置信度)
+gate              accuracy 1.00
+confusion         tp=4 fp=0 tn=11 fn=1
 ```
 
-两个必须说清的前提：
+语料是 15 个合成样本 + **1 个真实样本**（就是本仓库这一夜，含那条误报）。
 
-- **语料是合成的，标签是构造出来的。** 这些数字是启发式规则的回归测试，
-  不是对真实 Agent 行为的科学基准。
+三个必须说清的前提：
+
+- **合成语料、构造标签。** 这些数字是启发式规则的回归测试，不是对真实 Agent 行为的科学基准。
 - **有一个已知漏检**：没传 `--target` 的反复改同一文件，检测器看不见。
+- **主题漂移检测被降级过，不是调参调好的。** 它在本仓库这一夜上误报了（0.097），
+  我量完之后发现分不开"合法新词汇"和"真的跑题"，于是把它降成提示而不是猜一个阈值。
+  过程在 [`docs/BENCHMARKS.md`](docs/BENCHMARKS.md)。
 
 详见 [`docs/BENCHMARKS.md`](docs/BENCHMARKS.md)。
 
@@ -127,7 +147,7 @@ confusion        tp=6 fp=0 tn=8 fn=1
 - **不是 Agent 框架**：它不跑你的 Agent，它盯着它。
 - **不是评测平台**：它不打分模型，它给一次夜班打分。
 - **不是沙箱**：它记录发生过什么，它不拦你。
-- **不是魔法**：漂移检测就是五条启发式 + 一个分词器，它会错，而且它自己在报告里说。
+- **不是魔法**：漂移检测就是四条启发式 + 一个分词器，它会错，而且它自己在报告里说。
 
 ## 常见问题
 
