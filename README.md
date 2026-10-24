@@ -177,9 +177,9 @@ built v0.1 — no edited highlights. Every number below is read out of it.
 | | |
 | --- | --- |
 | done-criteria | 5, all proven with captured output |
-| steps / checks / checkpoints | 11 / 15 / 3 |
-| evidence | 31 artefacts, hashed |
-| evidence coverage | 100 % of steps |
+| log | 35 events — 11 steps, 20 checks, 3 checkpoints |
+| evidence | 36 artefacts, hashed |
+| evidence coverage | 100 % of steps carry a receipt (every re-check is appended, so the counts grow) |
 | verdict | **DONE & PROVEN** |
 
 Three things the shift caught that a chat summary would have glossed over:
