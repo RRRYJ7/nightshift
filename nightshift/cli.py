@@ -292,8 +292,10 @@ def cmd_gate(args: argparse.Namespace) -> int:
     if g.ok:
         print(f"  {util.green('GATE GREEN')} — every criterion is proven with evidence.")
     elif a["stats"]["criteria"] == 0:
-        print(f"  {util.red('GATE RED')} — the flight plan has no done-criteria."
-              f" {util.grey('add some: nsh done add \"...\" -- <command>')}")
+        # keep the quotes out of the f-string expression: a backslash inside
+        # braces is a SyntaxError before Python 3.12
+        hint = util.grey('add some: nsh done add "..." -- <command>')
+        print(f"  {util.red('GATE RED')} — the flight plan has no done-criteria. {hint}")
     else:
         print(f"  {util.red('GATE RED')} — do not call this done."
               f" {util.plural(len(g.failures), 'criterion', 'criteria')} unproven.")

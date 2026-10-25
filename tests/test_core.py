@@ -60,6 +60,45 @@ CONTRACT = {
 # util
 # --------------------------------------------------------------------------- #
 
+# --------------------------------------------------------------------------- #
+# the 3.10 syntax floor
+# --------------------------------------------------------------------------- #
+
+class TestSyntaxFloor(unittest.TestCase):
+    """PEP 701 (backslashes and same quotes inside f-string expressions) only
+    landed in Python 3.12. A single one of those breaks every 3.10/3.11 install
+    while passing locally on 3.13 -- which is exactly how the first CI run went
+    red on three operating systems at once.
+    """
+
+    def test_no_backslash_inside_fstring_expressions(self):
+        import ast
+
+        skip = {".git", ".nightshift", ".nightshift-demo", "docs"}
+        offenders = []
+        for path in sorted(ROOT.rglob("*.py")):
+            if skip & set(path.parts):
+                continue
+            src = path.read_text(encoding="utf-8-sig")
+            tree = ast.parse(src, filename=str(path))
+            for node in ast.walk(tree):
+                if not isinstance(node, ast.JoinedStr):
+                    continue
+                for part in node.values:
+                    if isinstance(part, ast.FormattedValue):
+                        seg = ast.get_source_segment(src, part.value) or ""
+                        if "\\" in seg:
+                            offenders.append(f"{path.relative_to(ROOT)}:{node.lineno}")
+        self.assertEqual(
+            offenders, [],
+            "backslash inside an f-string expression breaks Python 3.10/3.11: " + ", ".join(offenders),
+        )
+
+
+# --------------------------------------------------------------------------- #
+# util
+# --------------------------------------------------------------------------- #
+
 class TestUtil(unittest.TestCase):
     def test_tokenize_latin_stems_plurals(self):
         toks = util.tokenize("the tests are passing files")
