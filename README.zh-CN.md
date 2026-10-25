@@ -1,6 +1,11 @@
 # NIGHTSHIFT · 夜班
 
+[English](README.md) · **中文** · [中文文档导读](docs/zh/README.md)
+
 **让你的 Agent 通宵干活，早上给你一份能审的飞行报告，而不是一段自我感觉良好的总结。**
+
+它是给 **DeepSeek Harness（DSH）** 写的 skill（`SKILL.md` + `nsh`），
+也能用在任何"能跑一条 shell 命令"的 harness 上：Claude Code、Codex、Cursor、OpenCode，或者一个 cron。
 
 一个 skill + 一个零依赖 CLI：把"跑了一整晚的 Agent"变成人五分钟内能审完的东西。
 
@@ -82,11 +87,11 @@ nsh brief    # 上面那十行
 ## 装成 skill（让 Agent 自己这么干）
 
 ```bash
+# DeepSeek Harness（这个 skill 就是为它写的）
+cp -r . ~/.dsh/skills/nightshift
+
 # Claude Code / Claude Agent SDK
 cp -r . ~/.claude/skills/nightshift
-
-# DeepSeek Harness
-cp -r . ~/.dsh/skills/nightshift
 
 # Codex / Cursor / 任何读 AGENTS.md 的
 cat SKILL.md >> AGENTS.md

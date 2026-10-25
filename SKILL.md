@@ -1,10 +1,16 @@
 ---
 name: nightshift
-description: Drive a long unattended work session (hours, not minutes) that ends in a flight report a human can audit. Use when the user says "work on it while I sleep", "keep going until it is done", "spend the next N hours on this", or whenever a task will run longer than ~30 minutes and you must not declare success without proof. Enforces a flight plan, an append-only black box, checkpoints, drift detection, a convergence check and an evidence gate.
+description: Drive a long unattended work session (hours, not minutes) that ends in a flight report a human can audit. Built as a DeepSeek Harness (DSH) skill; the same file works in Claude Code, Codex and Cursor. Use when the user says "work on it while I sleep", "keep going until it is done", "spend the next N hours on this", or whenever a task will run longer than ~30 minutes and you must not declare success without proof. Enforces a flight plan, an append-only black box, checkpoints, drift detection, a convergence check and an evidence gate.
 license: MIT
 ---
 
 # NIGHTSHIFT
+
+A **DeepSeek Harness (DSH)** skill: install it at `~/.dsh/skills/nightshift`, and
+the agent reaches for it whenever a task is long enough that "done" needs proof.
+It is a plain `SKILL.md` plus a CLI, so the same file also works in Claude Code
+(`~/.claude/skills/`), Codex and Cursor (`AGENTS.md`), and any harness that can
+run a shell command.
 
 You are about to work for hours without a human watching. The failure mode is
 not "the agent cannot code". The failure mode is **the agent says it is done,

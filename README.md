@@ -1,9 +1,15 @@
 # NIGHTSHIFT
 
+**English** · [中文](README.zh-CN.md) · [中文文档导读](docs/zh/README.md)
+
 **Give your agent a night shift. Wake up to a flight report, not a fantasy.**
 
 A skill + a zero-dependency CLI that turns a long unattended run — code, data,
 documents — into something a human can audit in five minutes.
+
+Built as a **DeepSeek Harness (DSH) skill** (`SKILL.md` + `nsh`), and it works
+with any harness that can run a shell command: Claude Code, Codex, Cursor,
+OpenCode, or a cron job.
 
 <p align="center">
   <img src="docs/demo.gif" alt="a real NIGHTSHIFT session: init, a failing check, a fix, a green gate, a brief" width="820">
@@ -105,11 +111,11 @@ The CLI is half of it. The other half is `SKILL.md`, which tells the agent the
 seven laws and when to call `nsh`.
 
 ```bash
+# DeepSeek Harness (the harness this was built for)
+cp -r . ~/.dsh/skills/nightshift
+
 # Claude Code / Claude Agent SDK
 cp -r . ~/.claude/skills/nightshift
-
-# DeepSeek Harness
-cp -r . ~/.dsh/skills/nightshift
 
 # Codex / Cursor / anything that reads AGENTS.md or a rules file
 cat SKILL.md >> AGENTS.md

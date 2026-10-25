@@ -19,6 +19,8 @@ REQUIRED = [
     ("docs/WHY.md", 2000, ["receipts", "gate"]),
     ("docs/BENCHMARKS.md", 1500, ["precision", "false negative"]),
     ("docs/WALKTHROUGH.md", 2500, ["nsh gate", "nsh verify"]),
+    ("docs/zh/README.md", 800, ["中文"]),
+    ("docs/zh/WALKTHROUGH.md", 2000, ["nsh gate"]),
     ("CONTRIBUTING.md", 500, ["bench/cases"]),
     ("LICENSE", 1000, ["MIT License"]),
     ("install.sh", 200, ["nsh init"]),
