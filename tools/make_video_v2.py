@@ -168,23 +168,38 @@ def speed_lines(img: Image.Image, cx: float, cy: float, t: float, alpha=1.0):
 # the mascot: a small whale on the night shift
 # --------------------------------------------------------------------------- #
 
+def pop_font(path: str, size: int, t: float, dur: float = 0.45) -> ImageFont.FreeTypeFont:
+    """Font size that overshoots then settles: the cheapest 'punch-in' there is."""
+    k = 1.0 + 0.22 * (1 - ease_out(clamp01(t / dur)))
+    return ImageFont.truetype(path, max(8, int(size * k)))
+
+
+def sparkles(img: Image.Image, cx: float, cy: float, r: float, t: float, alpha=1.0, n=5):
+    d = ImageDraw.Draw(img)
+    for i in range(n):
+        a = t * 1.6 + i * (math.pi * 2 / n)
+        px, py = cx + math.cos(a) * r, cy + math.sin(a) * r * 0.7
+        s = 3 + 3 * (0.5 + 0.5 * math.sin(t * 6 + i))
+        col = (255, 255, 255, int(150 * alpha)) if i % 2 else (*CYAN, int(160 * alpha))
+        d.line([px - s, py, px + s, py], fill=col, width=2)
+        d.line([px, py - s, px, py + s], fill=col, width=2)
+
+
 def whale(img: Image.Image, cx: float, cy: float, scale: float, t: float,
           mood: str = "work", alpha: float = 1.0, sleeping: bool = False):
-    """Draw the whale at 2x then downscale, so the curves stay clean.
+    """A chibi whale, front-facing: big head, two big eyes, blush, tiny body.
 
-    Head on the left, tail on the right. Geometry is defined in a 1000x760
-    virtual box and then scaled, so the features keep their proportions.
+    Drawn at 2x into its own layer and downscaled, so the curves stay clean.
     """
     if alpha <= 0.02:
         return
     s = max(0.2, scale)
     SS = 2
-    VW, VH = 1000, 760
+    VW, VH = 1000, 820
     lw, lh = int(VW * s * SS / 2), int(VH * s * SS / 2)
     layer = Image.new("RGBA", (lw, lh), (0, 0, 0, 0))
     d = ImageDraw.Draw(layer)
-
-    k = (lw / VW)  # virtual -> layer
+    k = lw / VW
 
     def X(v):
         return v * k
@@ -192,53 +207,57 @@ def whale(img: Image.Image, cx: float, cy: float, scale: float, t: float,
     def Y(v):
         return v * k
 
-    bob = math.sin(t * 2.0) * 12
+    # squash & stretch
+    bob = math.sin(t * 2.4) * 14
+    squash = 1.0 + math.sin(t * 2.4 + math.pi / 2) * 0.035
 
-    body = (X(70), Y(230 + bob), X(770), Y(640 + bob))
-    belly = (X(130), Y(410 + bob), X(710), Y(636 + bob))
+    def P(pts):
+        return [(X(x), Y(cy0 + (y - cy0) * squash + bob)) for x, y in pts]
 
-    # tail fan
-    ty = Y(430 + bob)
-    flap = math.sin(t * 3.2) * 10
-    d.polygon([(X(752), ty), (X(930), Y(330 + bob + flap)), (X(900), ty), (X(930), Y(540 + bob - flap))],
-              fill=(*blend(TEAL, DEEP, 0.30), 255))
+    cy0 = 470
+    body_c = (400, 470)
 
-    # body + belly
-    d.ellipse(body, fill=(*TEAL, 255))
-    d.ellipse(belly, fill=(*blend(TEAL, (255, 255, 255), 0.62), 255))
-    # rim light (top-left)
-    d.arc(body, start=185, end=300, fill=(*CYAN, 190), width=max(3, int(X(9))))
+    # tail (behind the body, right side)
+    flap = math.sin(t * 3.0) * 12
+    d.polygon(P([(860, 470), (975, 360 + flap), (975, 590 - flap)]),
+              fill=(*blend(TEAL, DEEP, 0.34), 255))
 
-    # pectoral fin: sits on the belly edge, tilted, so it reads as a limb
-    d.polygon([(X(150), Y(520 + bob)), (X(300), Y(470 + bob)),
-               (X(330), Y(520 + bob)), (X(190), Y(565 + bob))],
-              fill=(*blend(TEAL, DEEP, 0.22), 255))
+    # body
+    d.ellipse([X(560), Y(430 + bob), X(930), Y(715 + bob)], fill=(*blend(TEAL, DEEP, 0.18), 255))
+    # head
+    head = [X(200), Y(215 + bob), X(620), Y(635 + bob)]
+    d.ellipse(head, fill=(*TEAL, 255))
+    # rim light
+    d.arc(head, start=190, end=290, fill=(*CYAN, 170), width=max(3, int(X(10))))
+    # belly patch
+    d.ellipse([X(610), Y(560 + bob), X(880), Y(700 + bob)], fill=(*blend(TEAL, (255, 255, 255), 0.50), 255))
+
+    # eyes
+    er = X(66)
+    blink = 1.0
+    if sleeping or math.sin(t * 1.3) > 0.978:
+        blink = 0.08
+    for ex in (X(340), X(500)):
+        ey = Y(455 + bob)
+        if blink > 0.5:
+            d.ellipse([ex - er, ey - er * blink, ex + er, ey + er * blink], fill=(*INK, 255))
+            pr = er * 0.66
+            d.ellipse([ex - pr, ey - pr, ex + pr, ey + pr], fill=(22, 28, 46, 255))
+            d.ellipse([ex - pr * 0.62, ey - pr * 0.86, ex + pr * 0.06, ey - pr * 0.12],
+                      fill=(255, 255, 255, 255))
+            d.ellipse([ex + pr * 0.18, ey + pr * 0.18, ex + pr * 0.5, ey + pr * 0.52],
+                      fill=(255, 255, 255, 190))
+        else:
+            d.arc([ex - er, ey - er * 0.5, ex + er, ey + er * 0.5], 200, 340,
+                  fill=(22, 28, 46, 255), width=max(3, int(X(10))))
+
+    # tiny mouth
+    my = Y(575 + bob)
+    d.arc([X(385), my - X(24), X(455), my + X(24)], 20, 160, fill=(22, 28, 46, 235), width=max(3, int(X(9))))
 
     # night cap
-    d.polygon([(X(150), Y(272 + bob)), (X(300), Y(138 + bob)), (X(392), Y(258 + bob))],
-              fill=(*AMBER, 250))
-    d.ellipse((X(272), Y(110 + bob), X(340), Y(166 + bob)), fill=(*blend(AMBER, (255, 255, 255), 0.5), 255))
-    d.line([(X(150), Y(272 + bob)), (X(392), Y(258 + bob))], fill=(*blend(AMBER, RED, 0.3), 255), width=max(2, int(X(10))))
-
-    # eye
-    ex, ey = X(250), Y(380 + bob)
-    er = X(44)
-    blink = 1.0
-    if sleeping or math.sin(t * 1.1) > 0.982:
-        blink = 0.10
-    if blink > 0.5:
-        d.ellipse([ex - er, ey - er * blink, ex + er, ey + er * blink], fill=(*INK, 255))
-        d.ellipse([ex - er * 0.62, ey - er * 0.72, ex + er * 0.62, ey + er * 0.52], fill=(18, 24, 40, 255))
-        d.ellipse([ex - er * 0.34, ey - er * 0.58, ex + er * 0.14, ey - er * 0.06], fill=(255, 255, 255, 255))
-        d.ellipse([ex + er * 0.14, ey + er * 0.10, ex + er * 0.34, ey + er * 0.30], fill=(255, 255, 255, 170))
-    else:
-        d.arc([ex - er, ey - er * 0.45, ex + er, ey + er * 0.45], 200, 340,
-              fill=(18, 24, 40, 255), width=max(3, int(X(9))))
-
-    # blush + smile
-    # cheek: a soft glow reads better than a filled ellipse over teal
-    d.arc([X(150), Y(404 + bob), X(330), Y(500 + bob)], 15, 150,
-          fill=(18, 24, 40, 230), width=max(3, int(X(9))))
+    d.polygon(P([(262, 268), (410, 158), (548, 268)]), fill=(*AMBER, 252))
+    d.ellipse([X(382), Y(134 + bob), X(440), Y(192 + bob)], fill=(*blend(AMBER, (255, 255, 255), 0.55), 255))
 
     layer = layer.resize((lw // SS, lh // SS), Image.LANCZOS)
     if alpha < 0.99:
@@ -246,16 +265,13 @@ def whale(img: Image.Image, cx: float, cy: float, scale: float, t: float,
         layer.putalpha(a)
     img.alpha_composite(layer, (int(cx - lw / (2 * SS)), int(cy - lh / (2 * SS))))
 
-    add_glow(img, cx - 150 * s, cy + 40 * s, int(60 * s), PINK, 0.30)
+    # soft cheeks + aura, on top of the composited layer
     if mood == "work":
-        add_glow(img, cx, cy + 120 * s, int(140 * s), CYAN, 0.35)
+        add_glow(img, cx, cy + 150 * s, int(150 * s), CYAN, 0.30)
+        sparkles(img, cx, cy - 40 * s, 190 * s, t, 0.8 * alpha)
     if sleeping:
-        put(ImageDraw.Draw(img), (cx + 120 * s, cy - 150 * s), "z z Z", F_H2, DIM, 0.9 * alpha)
+        put(ImageDraw.Draw(img), (cx + 150 * s, cy - 190 * s), "z z Z", F_H2, DIM, 0.9 * alpha)
 
-
-# --------------------------------------------------------------------------- #
-# scenes
-# --------------------------------------------------------------------------- #
 
 def sky(img: Image.Image, t: float, warm: float = 0.0):
     d = ImageDraw.Draw(img)
@@ -283,7 +299,7 @@ def scene1(img, d, lt, dur):
     d.ellipse([770, 250, 870, 350], fill=(226, 236, 255, 230))
 
     put_glow(img, (W / 2, 470), "02:41", ImageFont.truetype(MOB, 96), CYAN, a, anchor="ma")
-    put(d, (W / 2, 600), "你睡了。", F_H1, INK, env(t, 0.5, dur), anchor="ma", shadow=True)
+    put(d, (W / 2, 600), "你睡了。", pop_font(YB, 96, t - 0.5), INK, env(t, 0.5, dur), anchor="ma", shadow=True)
     put(d, (W / 2, 730), "它还在干。", F_H2, DIM, env(t, 1.2, dur), anchor="ma")
 
     whale(img, W / 2, 1250, 1.28, t, mood="work", alpha=env(t, 0.2, dur))
@@ -317,7 +333,7 @@ def scene2(img, d, lt, dur):
             off = (i - 1) * 7
             d.rounded_rectangle([bx0 + off, by0 + i * 4, bx0 + bw + off, by0 + bh + i * 4], radius=36,
                                 outline=(*RED, int(70 * ga)), width=2)
-        put_glow(img, (W / 2, 690), "真的吗？", F_H1, RED, ga, anchor="ma")
+        put_glow(img, (W / 2, 690), "真的吗？", pop_font(YB, 96, t - 1.6), RED, ga, anchor="ma")
 
     if t > 2.6:
         chips = [("完成没定义", RED), ("证据没留下", RED), ("早就跑偏了", AMBER)]
@@ -436,8 +452,8 @@ def scene6(img, d, lt, dur):
     add_glow(img, W / 2, 700, 420, CYAN, 0.5)
     a = env(t, 0, dur, 0.5, 0.4)
 
-    put_glow(img, (W / 2, 520), "给你的 Agent", F_MEGA, INK, a, anchor="ma")
-    put_glow(img, (W / 2, 680), "一个夜班", F_MEGA, CYAN, a, anchor="ma")
+    put_glow(img, (W / 2, 520), "给你的 Agent", pop_font(YB, 132, t), INK, a, anchor="ma")
+    put_glow(img, (W / 2, 680), "一个夜班", pop_font(YB, 132, t - 0.12), CYAN, a, anchor="ma")
     put(d, (W / 2, 850), "醒来读报告，不是读幻觉", F_BODY, DIM, env(t, 0.5, dur), anchor="ma")
 
     whale(img, W / 2, 1150, 1.0, t, mood="wave", alpha=env(t, 0.3, dur))
