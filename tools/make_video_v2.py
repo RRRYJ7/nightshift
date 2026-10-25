@@ -170,86 +170,87 @@ def speed_lines(img: Image.Image, cx: float, cy: float, t: float, alpha=1.0):
 
 def whale(img: Image.Image, cx: float, cy: float, scale: float, t: float,
           mood: str = "work", alpha: float = 1.0, sleeping: bool = False):
-    """Draw the whale at 2x then downscale, so the curves stay clean."""
+    """Draw the whale at 2x then downscale, so the curves stay clean.
+
+    Head on the left, tail on the right. Geometry is defined in a 1000x760
+    virtual box and then scaled, so the features keep their proportions.
+    """
     if alpha <= 0.02:
         return
     s = max(0.2, scale)
     SS = 2
-    w, h = int(620 * s * SS), int(520 * s * SS)
-    layer = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+    VW, VH = 1000, 760
+    lw, lh = int(VW * s * SS / 2), int(VH * s * SS / 2)
+    layer = Image.new("RGBA", (lw, lh), (0, 0, 0, 0))
     d = ImageDraw.Draw(layer)
 
-    bob = math.sin(t * 2.2) * 10 * SS * s
-    body_box = [40 * SS * s, (110 * SS * s) + bob, 470 * SS * s, (400 * SS * s) + bob]
-    x0, y0, x1, y1 = body_box
+    k = (lw / VW)  # virtual -> layer
 
-    # tail
-    tx, ty = x1 - 10 * SS * s, (y1 + y0) / 2
-    flap = math.sin(t * 3.4) * 16 * SS * s
-    d.polygon([(tx, ty), (tx + 120 * SS * s, ty - 80 * SS * s + flap),
-               (tx + 96 * SS * s, ty)], fill=(*blend(TEAL, DEEP, 0.35), 255))
-    d.polygon([(tx, ty), (tx + 120 * SS * s, ty + 80 * SS * s + flap),
-               (tx + 96 * SS * s, ty)], fill=(*blend(TEAL, DEEP, 0.2), 255))
+    def X(v):
+        return v * k
 
-    # body
-    d.ellipse(body_box, fill=(*TEAL, 255))
-    # belly
-    d.ellipse([x0 + 60 * SS * s, y0 + 120 * SS * s, x1 - 40 * SS * s, y1 - 10 * SS * s],
-              fill=(*blend(TEAL, (255, 255, 255), 0.55), 255))
-    # rim light
-    d.arc(body_box, start=150, end=250, fill=(*CYAN, 200), width=int(7 * SS * s))
+    def Y(v):
+        return v * k
 
-    # fin
-    fx, fy = x0 + 150 * SS * s, y0 + 210 * SS * s
-    d.ellipse([fx, fy, fx + 110 * SS * s, fy + 60 * SS * s], fill=(*blend(TEAL, DEEP, 0.25), 255))
+    bob = math.sin(t * 2.0) * 12
 
-    # scarf
-    sy = y0 + 150 * SS * s
-    d.rounded_rectangle([x0 + 40 * SS * s, sy, x0 + 260 * SS * s, sy + 46 * SS * s],
-                        radius=20 * SS * s, fill=(*AMBER, 245))
-    d.polygon([(x0 + 250 * SS * s, sy + 10 * SS * s), (x0 + 420 * SS * s, sy - 30 * SS * s),
-               (x0 + 430 * SS * s, sy + 40 * SS * s), (x0 + 250 * SS * s, sy + 50 * SS * s)],
-              fill=(*blend(AMBER, RED, 0.25), 235))
+    body = (X(70), Y(230 + bob), X(770), Y(640 + bob))
+    belly = (X(130), Y(410 + bob), X(710), Y(636 + bob))
+
+    # tail fan
+    ty = Y(430 + bob)
+    flap = math.sin(t * 3.2) * 10
+    d.polygon([(X(752), ty), (X(930), Y(330 + bob + flap)), (X(900), ty), (X(930), Y(540 + bob - flap))],
+              fill=(*blend(TEAL, DEEP, 0.30), 255))
+
+    # body + belly
+    d.ellipse(body, fill=(*TEAL, 255))
+    d.ellipse(belly, fill=(*blend(TEAL, (255, 255, 255), 0.62), 255))
+    # rim light (top-left)
+    d.arc(body, start=185, end=300, fill=(*CYAN, 190), width=max(3, int(X(9))))
+
+    # pectoral fin: sits on the belly edge, tilted, so it reads as a limb
+    d.polygon([(X(150), Y(520 + bob)), (X(300), Y(470 + bob)),
+               (X(330), Y(520 + bob)), (X(190), Y(565 + bob))],
+              fill=(*blend(TEAL, DEEP, 0.22), 255))
+
+    # night cap
+    d.polygon([(X(150), Y(272 + bob)), (X(300), Y(138 + bob)), (X(392), Y(258 + bob))],
+              fill=(*AMBER, 250))
+    d.ellipse((X(272), Y(110 + bob), X(340), Y(166 + bob)), fill=(*blend(AMBER, (255, 255, 255), 0.5), 255))
+    d.line([(X(150), Y(272 + bob)), (X(392), Y(258 + bob))], fill=(*blend(AMBER, RED, 0.3), 255), width=max(2, int(X(10))))
 
     # eye
-    ex, ey = x0 + 330 * SS * s, y0 + 120 * SS * s
+    ex, ey = X(250), Y(380 + bob)
+    er = X(44)
     blink = 1.0
-    if sleeping or (math.sin(t * 0.9) > 0.985):
-        blink = 0.12
-    er = 46 * SS * s
-    d.ellipse([ex - er, ey - er * blink, ex + er, ey + er * blink], fill=(*INK, 255))
+    if sleeping or math.sin(t * 1.1) > 0.982:
+        blink = 0.10
     if blink > 0.5:
-        d.ellipse([ex - 12 * SS * s, ey - 16 * SS * s, ex + 18 * SS * s, ey + 14 * SS * s],
-                  fill=(20, 26, 40, 255))
-        d.ellipse([ex - 4 * SS * s, ey - 12 * SS * s, ex + 6 * SS * s, ey - 2 * SS * s],
-                  fill=(255, 255, 255, 255))
+        d.ellipse([ex - er, ey - er * blink, ex + er, ey + er * blink], fill=(*INK, 255))
+        d.ellipse([ex - er * 0.62, ey - er * 0.72, ex + er * 0.62, ey + er * 0.52], fill=(18, 24, 40, 255))
+        d.ellipse([ex - er * 0.34, ey - er * 0.58, ex + er * 0.14, ey - er * 0.06], fill=(255, 255, 255, 255))
+        d.ellipse([ex + er * 0.14, ey + er * 0.10, ex + er * 0.34, ey + er * 0.30], fill=(255, 255, 255, 170))
     else:
-        d.arc([ex - er, ey - er * 0.5, ex + er, ey + er * 0.5], 200, 340,
-              fill=(20, 26, 40, 255), width=int(7 * SS * s))
+        d.arc([ex - er, ey - er * 0.45, ex + er, ey + er * 0.45], 200, 340,
+              fill=(18, 24, 40, 255), width=max(3, int(X(9))))
 
-    # blush
-    d.ellipse([ex - 90 * SS * s, ey + 40 * SS * s, ex - 40 * SS * s, ey + 70 * SS * s],
-              fill=(*PINK, 90))
-    # smile
-    d.arc([x0 + 250 * SS * s, y0 + 150 * SS * s, x0 + 400 * SS * s, y0 + 240 * SS * s],
-          20, 130, fill=(20, 26, 40, 220), width=int(6 * SS * s))
+    # blush + smile
+    # cheek: a soft glow reads better than a filled ellipse over teal
+    d.arc([X(150), Y(404 + bob), X(330), Y(500 + bob)], 15, 150,
+          fill=(18, 24, 40, 230), width=max(3, int(X(9))))
 
-    # little lamp
-    if mood == "work":
-        lx, ly = x0 + 30 * SS * s, y1 - 30 * SS * s
-        d.rectangle([lx - 6 * SS * s, ly - 70 * SS * s, lx + 6 * SS * s, ly], fill=(*DIM, 255))
-        d.polygon([(lx - 40 * SS * s, ly - 70 * SS * s), (lx + 40 * SS * s, ly - 70 * SS * s),
-                   (lx + 24 * SS * s, ly - 110 * SS * s), (lx - 24 * SS * s, ly - 110 * SS * s)],
-                  fill=(*AMBER, 255))
-
-    layer = layer.resize((w // SS, h // SS), Image.LANCZOS)
+    layer = layer.resize((lw // SS, lh // SS), Image.LANCZOS)
     if alpha < 0.99:
         a = layer.getchannel("A").point(lambda p: int(p * alpha))
         layer.putalpha(a)
-    img.alpha_composite(layer, (int(cx - w / (2 * SS)), int(cy - h / (2 * SS))))
+    img.alpha_composite(layer, (int(cx - lw / (2 * SS)), int(cy - lh / (2 * SS))))
 
+    add_glow(img, cx - 150 * s, cy + 40 * s, int(60 * s), PINK, 0.30)
     if mood == "work":
-        add_glow(img, cx + 6 * s, cy + 110 * s, int(150 * s), AMBER, 0.5)
+        add_glow(img, cx, cy + 120 * s, int(140 * s), CYAN, 0.35)
+    if sleeping:
+        put(ImageDraw.Draw(img), (cx + 120 * s, cy - 150 * s), "z z Z", F_H2, DIM, 0.9 * alpha)
 
 
 # --------------------------------------------------------------------------- #
@@ -285,7 +286,7 @@ def scene1(img, d, lt, dur):
     put(d, (W / 2, 600), "你睡了。", F_H1, INK, env(t, 0.5, dur), anchor="ma", shadow=True)
     put(d, (W / 2, 730), "它还在干。", F_H2, DIM, env(t, 1.2, dur), anchor="ma")
 
-    whale(img, W / 2, 1180, 1.25, t, mood="work", alpha=env(t, 0.2, dur))
+    whale(img, W / 2, 1250, 1.28, t, mood="work", alpha=env(t, 0.2, dur))
 
     if t > 1.8:
         put(d, (W / 2, 1560), "一整夜，没人看着", F_SMALL, DIM, env(t, 1.8, dur) * 0.9, anchor="ma")
@@ -372,7 +373,7 @@ def scene4(img, d, lt, dur):
     if t > 0.5:
         ra = env(t, 0.5, dur, 0.5, 0.25)
         top = 430 + (1 - ease_out((t - 0.5) / 0.7)) * 60
-        d.rounded_rectangle([90, top, W - 90, top + 760], radius=36,
+        d.rounded_rectangle([90, top, W - 90, top + 650], radius=36,
                             fill=(14, 20, 34, int(245 * ra)), outline=(*CYAN, int(150 * ra)), width=2)
         put(d, (130, top + 34), "flight report", F_MONO_S, DIM, ra)
         put(d, (130, top + 80), "DONE & PROVEN", ImageFont.truetype(MOB, 54), GREEN, ra)
@@ -390,9 +391,9 @@ def scene4(img, d, lt, dur):
         # stamp
         if t > 2.0:
             sa = env(t, 2.0, dur, 0.25, 0.2)
-            d.rounded_rectangle([W - 380, top + 30, W - 120, top + 120], radius=18,
+            d.rounded_rectangle([W - 330, top + 150, W - 110, top + 240], radius=16,
                                 outline=(*GREEN, int(220 * sa)), width=4)
-            put(d, (W - 250, top + 48), "已证明", F_H2, GREEN, sa, anchor="ma")
+            put(d, (W - 220, top + 172), "已证明 5/5", ImageFont.truetype(YB, 40), GREEN, sa, anchor="ma")
 
     whale(img, 190, 1450, 0.62, t, mood="wave", alpha=env(t, 0.3, dur))
 
@@ -400,11 +401,11 @@ def scene4(img, d, lt, dur):
 def scene5(img, d, lt, dur):
     t = lt
     sky(img, t)
-    speed_lines(img, W / 2, H * 0.55, t * 0.6, 0.35)
+    speed_lines(img, W / 2, H * 0.55, t * 0.6, 0.18)
     particles(img, t, color=VIOLET)
 
-    put_glow(img, (W / 2, 250), "不只是程序员", F_H1, INK, env(t, 0, dur), anchor="ma")
-    put(d, (W / 2, 360), "只要“完成”能被一条命令判真假", F_SMALL, DIM, env(t, 0.4, dur), anchor="ma")
+    put_glow(img, (W / 2, 230), "不只是程序员", F_H1, INK, env(t, 0, dur), anchor="ma")
+    put(d, (W / 2, 372), "只要“完成”能被一条命令判真假", F_SMALL, DIM, env(t, 0.4, dur), anchor="ma")
 
     people = [
         ("程序员", "测试全绿 · 能构建", CYAN),
@@ -425,7 +426,7 @@ def scene5(img, d, lt, dur):
         put(d, (x + 34, y + 30), who, F_H2, col, ca)
         put(d, (x + 34, y + 126), what, F_TINY, DIM, ca)
 
-        whale(img, W / 2, 1780, 0.42, t, mood="work", alpha=env(t, 2.2, dur) * 0.8) if i == 5 else None
+        whale(img, W / 2, 1700, 0.5, t, mood="work", alpha=env(t, 2.2, dur) * 0.85) if i == 5 else None
 
 
 def scene6(img, d, lt, dur):
@@ -475,7 +476,15 @@ def frame_at(t: float) -> Image.Image:
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--stills", action="store_true")
+    ap.add_argument("--frame", type=float, default=None, help="render one frame at this many seconds")
     args = ap.parse_args()
+
+    if args.frame is not None:
+        p = ROOT / "docs" / "frames" / f"v2-single-{args.frame:05.2f}.png"
+        p.parent.mkdir(exist_ok=True)
+        frame_at(args.frame).save(p)
+        print(f"wrote {p}")
+        return 0
 
     OUT.parent.mkdir(parents=True, exist_ok=True)
     total = int(DUR * FPS)
