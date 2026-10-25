@@ -10,7 +10,7 @@
 # -RemoteUrl exists so this script can be tested against a local bare repository
 # without touching GitHub.
 param(
-    [string]$User = "chchliu",
+    [string]$User = "RRRYJ7",
     [string]$Repo = "nightshift",
     [string]$RemoteUrl = "",
     [switch]$Force

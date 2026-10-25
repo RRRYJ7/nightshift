@@ -19,7 +19,7 @@ from PIL import Image, ImageDraw, ImageFont
 
 ROOT = Path(__file__).resolve().parent.parent
 OUT = ROOT / "docs" / "nightshift-wide.mp4"
-REPO = "github.com/chchliu/nightshift"
+REPO = "github.com/RRRYJ7/nightshift"
 
 W, H = 1920, 1080
 FPS = 30

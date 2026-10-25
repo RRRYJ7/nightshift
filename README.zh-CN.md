@@ -47,7 +47,7 @@ Agent 框架解决编排，评测平台解决离线打分。**没有人解决你
 ## 60 秒上手（不用 API key，不用起服务）
 
 ```bash
-git clone https://github.com/chchliu/nightshift && cd nightshift
+git clone https://github.com/RRRYJ7/nightshift && cd nightshift
 python -m nightshift demo --open
 ```
 

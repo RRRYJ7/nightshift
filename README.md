@@ -66,7 +66,7 @@ night you did not watch.**
 ## Quickstart (60 seconds, no API key, no service)
 
 ```bash
-git clone https://github.com/chchliu/nightshift && cd nightshift
+git clone https://github.com/RRRYJ7/nightshift && cd nightshift
 python -m nightshift demo --open
 ```
 
