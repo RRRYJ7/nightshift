@@ -1,0 +1,829 @@
+{
+  "v": 1,
+  "ts": "2026-10-29T20:08:10+08:00",
+  "root": "C:\\Users\\liuchao\\Documents\\deepseek-harness\\default-workspace\\nightshift",
+  "git_head": "477e6b6a5c8928a819d1ae8059239c6097d0b2c9",
+  "files": {
+    ".gitattributes": {
+      "sha256": "083953833fcb3012c361ae73bb43fb132e4d218cba3b4d2ae3fab4ff37e2bb4d",
+      "size": 333,
+      "mtime": 1792869381
+    },
+    ".gitignore": {
+      "sha256": "5c5fd1466b9411213b20bcccdc9c7135eb8b66e44755d58d415ed9f344e1a56b",
+      "size": 368,
+      "mtime": 1793275603
+    },
+    "CHANGELOG.md": {
+      "sha256": "7838be9edc4c59f9aee09d069041885dbff5214a728b1fb980e29e8fb801ec47",
+      "size": 2301,
+      "mtime": 1792869585
+    },
+    "CONTRIBUTING.md": {
+      "sha256": "25dcbd3028827ae6d8866808a8d3436395a0ee445822de761360b92b89e7476b",
+      "size": 1875,
+      "mtime": 1792868962
+    },
+    "install.cmd": {
+      "sha256": "7c10a3589af3abec596fbab21252506d31f90345c18fbcfbe0fa51ee02dda6c0",
+      "size": 197,
+      "mtime": 1792869771
+    },
+    "install.ps1": {
+      "sha256": "8ceacbdff9383ad72798324b0ce6d534a963cd6440ea2a21d98edadea57c8561",
+      "size": 983,
+      "mtime": 1792867821
+    },
+    "install.sh": {
+      "sha256": "c1a25e5c0a8195a61f3669567d885d10e66cd1158b5b4b4f6db00ef073d60e94",
+      "size": 816,
+      "mtime": 1792867821
+    },
+    "LICENSE": {
+      "sha256": "9fe50478b63a80c6b475f4bd1b60c7deca9186f42b96e5a1b82f9b0ee81057a1",
+      "size": 1064,
+      "mtime": 1792867810
+    },
+    "push.cmd": {
+      "sha256": "434241015093aff1242fd0ae3d52fe7f059682ce7fa987d0027b213df5076bcc",
+      "size": 229,
+      "mtime": 1792869771
+    },
+    "push.ps1": {
+      "sha256": "de4eb7d4f587d39a1a66cb183f4b0cda052bef070948812c88f9ddb5125d7d56",
+      "size": 2803,
+      "mtime": 1792898250
+    },
+    "pyproject.toml": {
+      "sha256": "b406b6a4bdf001b5a5ee75dacf04e4c052b951c47923ce106445dbcc947f7444",
+      "size": 851,
+      "mtime": 1792868962
+    },
+    "README.md": {
+      "sha256": "bb27e45d29287b46f696fa6be024c1ec19694c2de10c4a85c7acfa3163ada5cf",
+      "size": 12816,
+      "mtime": 1792898633
+    },
+    "README.zh-CN.md": {
+      "sha256": "49d485ca4eaedcc6aabc035ee061bbab57cfbc267816adb6130e8f7cec70d8d2",
+      "size": 8410,
+      "mtime": 1792898633
+    },
+    "SECURITY.md": {
+      "sha256": "7db187e850cfd5b0be3eed32db0b2cc3032568d532a4703506e4225e1b8f3acf",
+      "size": 2132,
+      "mtime": 1792868604
+    },
+    "SKILL.md": {
+      "sha256": "c72ed4039599ab1aa36d416bd64f5d3e5a1cce21a9b18ec557961f4f256fbeb4",
+      "size": 9082,
+      "mtime": 1792898680
+    },
+    ".nightshift-demo/contract.json": {
+      "sha256": "e31d823e79251ad6a37956a30e80078bb73ba570289df24e8abe186348c685ba",
+      "size": 1856,
+      "mtime": 1792869758
+    },
+    ".nightshift-demo/events.jsonl": {
+      "sha256": "2a04f7ce620fff4c6449e3af94fd4bbec5451e87f27d69394479b6afad725450",
+      "size": 16083,
+      "mtime": 1792869759
+    },
+    ".nightshift-demo-red/contract.json": {
+      "sha256": "09f1e1f0eb6366f5bb98b0fed3297e3a3adfd7b8f2b2925d353a732d75ee3c4f",
+      "size": 1856,
+      "mtime": 1792869678
+    },
+    ".nightshift-demo-red/events.jsonl": {
+      "sha256": "d029cd6eb19be5e19af2a610ccff62924a3611e54288c8dc73d5dc515a76e03f",
+      "size": 15609,
+      "mtime": 1792869678
+    },
+    ".testtmp/x.txt": {
+      "sha256": "2689367b205c16ce32ed4200942b8b8b1e262dfc70d9bc9fbc77c49699a4f1df",
+      "size": 2,
+      "mtime": 1793275623
+    },
+    "docs/BENCHMARKS.md": {
+      "sha256": "f229e46ea00bf5306d2277cf1207141f11556ddc5730fecd6ed04140a33188d0",
+      "size": 8059,
+      "mtime": 1792869149
+    },
+    "docs/demo.gif": {
+      "sha256": "57fe3054f683196109c66a63a3e582d78be31aa2ee1a277b7df9ec9933d4042c",
+      "size": 947280,
+      "mtime": 1792868856
+    },
+    "docs/flight-report-red.png": {
+      "sha256": "e1befd4f751033b6746c195b3a633863ca5c3550c3af2aa9366363c11b23eda2",
+      "size": 214097,
+      "mtime": 1792869679
+    },
+    "docs/flight-report.png": {
+      "sha256": "3108a1cf57b27bffe7e518702aeadb270c0946a459e87604afd3fa38c71015a5",
+      "size": 220546,
+      "mtime": 1792869677
+    },
+    "docs/nightshift-vertical.mp4": {
+      "sha256": "",
+      "size": 4033490,
+      "mtime": 1792909436,
+      "skipped": true
+    },
+    "docs/nightshift-wide.mp4": {
+      "sha256": "5bfe7f07686d9e524469975899ff8dcd1e64da14fe2232e809a95dfb4a447fb3",
+      "size": 740460,
+      "mtime": 1792898309
+    },
+    "docs/PROTOCOL.md": {
+      "sha256": "00d114579a59f56c471a5875497ee0fee02047fcc18d6b0643b23bb2b40c6ff2",
+      "size": 9737,
+      "mtime": 1792869077
+    },
+    "docs/WALKTHROUGH.md": {
+      "sha256": "164cd792f8192f6ae6005c5a095200573c361fad4b77e5e0f8d48d37d050f952",
+      "size": 6614,
+      "mtime": 1792869236
+    },
+    "docs/WHY.md": {
+      "sha256": "b230e67bc25836dbaedfab1afd6f1e63abebe0bb1ec868ab2efcd16c45383be8",
+      "size": 4829,
+      "mtime": 1792868823
+    },
+    "examples/README.md": {
+      "sha256": "c998b56be30ebc1873e025b5002583110af09d46bb8aab846bc450ee919f3375",
+      "size": 3503,
+      "mtime": 1792869393
+    },
+    "nightshift/analysis.py": {
+      "sha256": "a1ace351aad4cac1e5154eb34e99ac70d0db2794d627add878a75acba343fcc8",
+      "size": 24136,
+      "mtime": 1793275521
+    },
+    "nightshift/bench.py": {
+      "sha256": "d88182ab9ce513cf0756156941d65e618609aa1b55eb20444d861c074bc25e60",
+      "size": 14395,
+      "mtime": 1792869134
+    },
+    "nightshift/cli.py": {
+      "sha256": "28a92852ffcbe09fe20db36fd7b0a8e30e9c68107e016aceb486ba3886560d6e",
+      "size": 28890,
+      "mtime": 1793275486
+    },
+    "nightshift/demo.py": {
+      "sha256": "34ee7726fca7a315a300201242c74e08c38a4670597786c705cf42f4a431c693",
+      "size": 11420,
+      "mtime": 1792869280
+    },
+    "nightshift/report.py": {
+      "sha256": "36f69890d3dc0e70cdcd9b64c49b6fedfd00ff8d3cd015d8cbd5d7fb270f7949",
+      "size": 20138,
+      "mtime": 1793275565
+    },
+    "nightshift/store.py": {
+      "sha256": "a2a839c85a3a8ce82f301bb38dbb752fb3e98b08bf98baa96da3b96001a6a082",
+      "size": 17792,
+      "mtime": 1793275454
+    },
+    "nightshift/svg.py": {
+      "sha256": "ef2d1dcb54ce57562850babb93ffccdc5f5a318c5c0e40fc4aa673a97e68f601",
+      "size": 8284,
+      "mtime": 1792868875
+    },
+    "nightshift/util.py": {
+      "sha256": "9b5da3ff7d99ba32f915181cd9fe887691a5b61a7baef08f1ef483af8559d4a5",
+      "size": 11206,
+      "mtime": 1792868946
+    },
+    "nightshift/__init__.py": {
+      "sha256": "19706b09279738bc081c8eecda52c997cce7b141ed891baa8c40b191f5a8dc0b",
+      "size": 233,
+      "mtime": 1792868962
+    },
+    "nightshift/__main__.py": {
+      "sha256": "307299fda7b77d22c64cb51430ec75e5f59d78e9c948786afb3b2544fe45e4b7",
+      "size": 79,
+      "mtime": 1792867598
+    },
+    "tests/test_core.py": {
+      "sha256": "1bfe4ca0f76c8e89cf4be74c2400b6accb68615ac3fa689abd12b515c37d194e",
+      "size": 26786,
+      "mtime": 1793275665
+    },
+    "tests/__init__.py": {
+      "sha256": "8cd6f6e6964ea0060145ccc118dca68944bb999a614810122c49b122baa2d322",
+      "size": 35,
+      "mtime": 1792867715
+    },
+    "tools/check_assets.py": {
+      "sha256": "ff9176141899371b99b2c7658e3b795ce4b3553352c86e41b6bbe838b33afc43",
+      "size": 1516,
+      "mtime": 1792869909
+    },
+    "tools/check_docs.py": {
+      "sha256": "16707382a21c84bde5fe6251b7b12a0245e869abaec72a78de1906859660eb58",
+      "size": 2189,
+      "mtime": 1792898681
+    },
+    "tools/make_demo_gif.py": {
+      "sha256": "da0d49af06d2cbce93de61de58cf597f8c93581c9e3cdf2c8d2c9723028f88ab",
+      "size": 8061,
+      "mtime": 1792867972
+    },
+    "tools/make_video.py": {
+      "sha256": "a1ccb36f4b021ef8592c3a721909a4cfa1f7d77150f7e7a1ab566de9952d2fc7",
+      "size": 13265,
+      "mtime": 1792898250
+    },
+    "tools/make_video_v2.py": {
+      "sha256": "55f1747f19d0c4f1a9d5d466335936a0a51a4f2a8d0ee9ef8889016f33c2cc14",
+      "size": 20224,
+      "mtime": 1792909223
+    },
+    "tools/make_video_wide.py": {
+      "sha256": "45a4caf21972e42b7c51b14333a636679e0c1d81681da7d7a82522ee93412133",
+      "size": 11022,
+      "mtime": 1792898250
+    },
+    "examples/ci/nightshift-shift.yml": {
+      "sha256": "bba802ed3bae851081b16412dbb92b2b1464d9834ea3aebe5e5b3d1abfad2b43",
+      "size": 1929,
+      "mtime": 1792868686
+    },
+    "examples/doc/check_sections.py": {
+      "sha256": "38bd435e4cd10ad03aaf01bd929a586774c64eed3e1ddd537be6123ac5cd72c0",
+      "size": 1136,
+      "mtime": 1792868582
+    },
+    "examples/doc/check_todos.py": {
+      "sha256": "d6b3092aefbcf5a397c7f26e02adaf395dbb42315b3a2f414874ecfe2bfa458e",
+      "size": 956,
+      "mtime": 1792868582
+    },
+    "examples/sample-shift/README.md": {
+      "sha256": "441c6ef6a8923e65bb571ac683187ce3a71b30b2c958b1d32d2c25ea61b7d9fe",
+      "size": 1315,
+      "mtime": 1792869393
+    },
+    "examples/sample-shift/slugify.py": {
+      "sha256": "8aa49424e7f7bb93c87d0a2009f80e576ac2d368d00ff4835b29acc640daea02",
+      "size": 805,
+      "mtime": 1792869371
+    },
+    "examples/sample-shift/test_slugify.py": {
+      "sha256": "176673d35446b3bc29808b2e617bf8e25bbc1b149c415e639121d2a59b10b405",
+      "size": 683,
+      "mtime": 1792898985
+    },
+    "docs/frames/frame-0010.png": {
+      "sha256": "80d33628abf89c583e375ca0f639784da386079cb6be581c78e1ea4cdaafd135",
+      "size": 7306,
+      "mtime": 1792867990
+    },
+    "docs/frames/frame-0133.png": {
+      "sha256": "d30d517d6c15cb9183eeab8e879731433017b66bb3636fbd2c872b84fae2713d",
+      "size": 36456,
+      "mtime": 1792867990
+    },
+    "docs/frames/frame-0134.png": {
+      "sha256": "e26b3bf6e918792b7b423766a194a039f58371cf4c29c7f5947dd451db1bfa5a",
+      "size": 37079,
+      "mtime": 1792867963
+    },
+    "docs/frames/frame-0136.png": {
+      "sha256": "d7f5b4017dc3a6c29a6738af2f97f70ff6509c250d08955d81a116c9fbf6628f",
+      "size": 43033,
+      "mtime": 1792867934
+    },
+    "docs/frames/frame-0258.png": {
+      "sha256": "ba964d428c4018b872f90c0970d2d67487cd39829d652fd38c8046e4b4150d4b",
+      "size": 38785,
+      "mtime": 1792867990
+    },
+    "docs/frames/frame-0260.png": {
+      "sha256": "c1e89e0fc00a11dab987f1dfe45518b6163a6f3a114851ba079e8c16b4210241",
+      "size": 41074,
+      "mtime": 1792867963
+    },
+    "docs/frames/frame-0264.png": {
+      "sha256": "a01e967b8d2c17f5f055fbd20b0e2cb0a9e4b6dd54a7a34915a987e8dc3664cc",
+      "size": 40876,
+      "mtime": 1792867934
+    },
+    "docs/frames/v2-00055.png": {
+      "sha256": "867c5604916c12be0ade71a246e75a7769f1a0edd27cc62ee8a33daaf24229e3",
+      "size": 179331,
+      "mtime": 1792899187
+    },
+    "docs/frames/v2-00186.png": {
+      "sha256": "8cd4a21d6c7cda23ce88d8810775875019315a1a7df4bb80303c4f88399363c6",
+      "size": 116450,
+      "mtime": 1792899217
+    },
+    "docs/frames/v2-00316.png": {
+      "sha256": "66898303f9b76082a9dcb091a358e3df7e51d4bfad579894f74e8df0a978ffb6",
+      "size": 188870,
+      "mtime": 1792899245
+    },
+    "docs/frames/v2-00465.png": {
+      "sha256": "7efe0bbd1a4be2f969e867a55fc10cbd823e90596182f027fb86a08fc9a80034",
+      "size": 147542,
+      "mtime": 1792899280
+    },
+    "docs/frames/v2-00632.png": {
+      "sha256": "3836e569fe6e526e0c8ecc7b71c80f705d23d399b22f3e925b284548ed315a09",
+      "size": 173101,
+      "mtime": 1792899316
+    },
+    "docs/frames/v2-00781.png": {
+      "sha256": "6b8a3466a7b6c08012b24a26096bfdcc4a4f78bd5987b898ffc67cd53dca0a80",
+      "size": 227764,
+      "mtime": 1792899349
+    },
+    "docs/frames/v2-00892.png": {
+      "sha256": "a874d88bc1536ca8f002e130541bcda8ae77b6ceaac8618e0d9a0ef13dfef0f9",
+      "size": 269770,
+      "mtime": 1792899388
+    },
+    "docs/frames/v2-single-01.80.png": {
+      "sha256": "fda404aa6f0823c86c84955ef79203d0bed5171ddf54ca9f8e709356c82251da",
+      "size": 162702,
+      "mtime": 1792899627
+    },
+    "docs/frames/v2-single-01.90.png": {
+      "sha256": "ea0ff21a59819148d990b1673b387e89b634e7492bcfe3c61584aeffa28c2400",
+      "size": 167865,
+      "mtime": 1792909441
+    },
+    "docs/frames/v2-single-11.50.png": {
+      "sha256": "a8272d331e8319a61b032167e157f4c3e14c6c48e1f9c502e560937fd84684ac",
+      "size": 181436,
+      "mtime": 1792899834
+    },
+    "docs/frames/v2-single-16.00.png": {
+      "sha256": "c6009c6b2465dc50b89e1f102cbcbeba50afa1aaabaa0142192475610f8ef9cd",
+      "size": 144254,
+      "mtime": 1792899603
+    },
+    "docs/frames/v2-single-16.20.png": {
+      "sha256": "1bd8c2f258352659ad2522e1dca184f471975a51454e20110982f33b147adecd",
+      "size": 148002,
+      "mtime": 1792899638
+    },
+    "docs/frames/v2-single-22.00.png": {
+      "sha256": "1c114a07ffd47f77379270352e328f732f2607d2560c90657c15f6289a2d360a",
+      "size": 202756,
+      "mtime": 1792899638
+    },
+    "docs/frames/v2-single-27.20.png": {
+      "sha256": "ed2d9c8ca2a9d8d58e71b0d89c86434fcf5158d7f181389f88aefbd3dfa14075",
+      "size": 260827,
+      "mtime": 1792909442
+    },
+    "docs/frames/v2-single-29.00.png": {
+      "sha256": "4044b74d919037f49e96c5f426a4e30b541f57113bb8c111d1f5b8d13de27856",
+      "size": 266552,
+      "mtime": 1792899835
+    },
+    "docs/frames/video-00118.png": {
+      "sha256": "2b728ed24090f4371e6378fa276c7c3726bdcb24b78843f0be433a7296c656a8",
+      "size": 39497,
+      "mtime": 1792868265
+    },
+    "docs/frames/video-00297.png": {
+      "sha256": "3a917f441ef03e1fbc081118ec35c71fced8d66cab346dc0e06b6b9b2d54f04e",
+      "size": 61604,
+      "mtime": 1792868268
+    },
+    "docs/frames/video-00475.png": {
+      "sha256": "7f88f82fe3f611ecb271c0f9c6e47b46b89c825f8759d3c7a47e15ff93c74d4a",
+      "size": 75019,
+      "mtime": 1792868272
+    },
+    "docs/frames/video-00653.png": {
+      "sha256": "204c38eb810ecaf4d0df23411ff8fe8a32e79796d08b1821b75111e5458318ed",
+      "size": 76462,
+      "mtime": 1792868276
+    },
+    "docs/frames/video-00792.png": {
+      "sha256": "fa50be40a7fe472de0c5ea42b8ba5fc9b166c6a78fb6b2011c6dbabab70b5c9e",
+      "size": 95392,
+      "mtime": 1792868278
+    },
+    "docs/frames/video-00930.png": {
+      "sha256": "a97e442eb6f8b1b42b623d0c857aa25f68f9e80e128102433281ea2086fd91c7",
+      "size": 69175,
+      "mtime": 1792868281
+    },
+    "docs/frames/wide-00074.png": {
+      "sha256": "8cc7ab36b52a62aee886683c03f593060314ced7a97d13c09e400f1fd6b0388d",
+      "size": 49620,
+      "mtime": 1792869876
+    },
+    "docs/frames/wide-00260.png": {
+      "sha256": "3bbb68b96dcfc2a03f1139340a6a1bca8e28c66737e660eb861307c940579da2",
+      "size": 52904,
+      "mtime": 1792869880
+    },
+    "docs/frames/wide-00418.png": {
+      "sha256": "e9b1813e7793902712a7bfb0a00eb2017496c27cac5c60b926a30075354e379a",
+      "size": 53898,
+      "mtime": 1792869883
+    },
+    "docs/frames/wide-00576.png": {
+      "sha256": "625334c9bcf2db27f2d1815b8845354ba4eae40ef15c5ec3dafe610bbd8c06c0",
+      "size": 52366,
+      "mtime": 1792869886
+    },
+    "docs/frames/wide-00725.png": {
+      "sha256": "eaacaa5d4b32b88b1884ed51c1d947ce96a993ef7d24cc3700c5d43183a9f53e",
+      "size": 62795,
+      "mtime": 1792869889
+    },
+    "docs/frames/wide-00874.png": {
+      "sha256": "ca2b6ec655f1c9a123fbb91fe2aa7786bb298d613bb538439ca4a9dd049fdc09",
+      "size": 48177,
+      "mtime": 1792869891
+    },
+    "docs/zh/BENCHMARKS.md": {
+      "sha256": "82b56e0992f9228379f580185c32b8326e9bff9b9852f95077284c29d51dd623",
+      "size": 5879,
+      "mtime": 1792898661
+    },
+    "docs/zh/PROTOCOL.md": {
+      "sha256": "33f1f7465dba56ccb7ba2dcbbf2a6cf5bdd7a4039b5660209c0717fa35d63f5d",
+      "size": 6218,
+      "mtime": 1792898671
+    },
+    "docs/zh/README.md": {
+      "sha256": "b8d5e0019e5265d0b37e5d2df176a525231be50a253bbedfb57637b71ef4c5c9",
+      "size": 1915,
+      "mtime": 1792898644
+    },
+    "docs/zh/WALKTHROUGH.md": {
+      "sha256": "0a5ae955a40ed3265809e723325d5abeb6d81f71daa4906ad0a9aed677bca78a",
+      "size": 6379,
+      "mtime": 1792898661
+    },
+    "docs/zh/WHY.md": {
+      "sha256": "c95dfb4f1ed736f8b9b4dd406c1447621952be47522f2b7d96f42b7e308edc72",
+      "size": 4418,
+      "mtime": 1792898644
+    },
+    "bench/cases/real-v0.1-build.json": {
+      "sha256": "50f1b13af4814bdede7ed8d1058fbf1419832a8af7d9e8585d736e8230584b2e",
+      "size": 13372,
+      "mtime": 1792869129
+    },
+    ".nightshift-demo-red/evidence/1792869678086-4945d0e2.txt": {
+      "sha256": "4945d0e2dad39ce91a37b92589936f768185b6ed7e1fa10b5a4b4b674620870f",
+      "size": 125,
+      "mtime": 1792869678
+    },
+    ".nightshift-demo-red/evidence/1792869678089-4945d0e2.txt": {
+      "sha256": "4945d0e2dad39ce91a37b92589936f768185b6ed7e1fa10b5a4b4b674620870f",
+      "size": 125,
+      "mtime": 1792869678
+    },
+    ".nightshift-demo-red/evidence/1792869678091-4945d0e2.txt": {
+      "sha256": "4945d0e2dad39ce91a37b92589936f768185b6ed7e1fa10b5a4b4b674620870f",
+      "size": 125,
+      "mtime": 1792869678
+    },
+    ".nightshift-demo-red/evidence/1792869678094-bb4cbace.txt": {
+      "sha256": "bb4cbace47a925e8cce8d83d602626bc441d525688eae64535d8f3d0652945b8",
+      "size": 137,
+      "mtime": 1792869678
+    },
+    ".nightshift-demo-red/evidence/1792869678097-4945d0e2.txt": {
+      "sha256": "4945d0e2dad39ce91a37b92589936f768185b6ed7e1fa10b5a4b4b674620870f",
+      "size": 125,
+      "mtime": 1792869678
+    },
+    ".nightshift-demo-red/evidence/1792869678100-bbc09dd3.txt": {
+      "sha256": "bbc09dd3b6fba9e5a8b1758aef9b027e55ca1da4db490e4090affd979286d394",
+      "size": 313,
+      "mtime": 1792869678
+    },
+    ".nightshift-demo-red/evidence/1792869678104-4945d0e2.txt": {
+      "sha256": "4945d0e2dad39ce91a37b92589936f768185b6ed7e1fa10b5a4b4b674620870f",
+      "size": 125,
+      "mtime": 1792869678
+    },
+    ".nightshift-demo-red/evidence/1792869678106-4945d0e2.txt": {
+      "sha256": "4945d0e2dad39ce91a37b92589936f768185b6ed7e1fa10b5a4b4b674620870f",
+      "size": 125,
+      "mtime": 1792869678
+    },
+    ".nightshift-demo-red/evidence/1792869678109-46ca6ab2.txt": {
+      "sha256": "46ca6ab2ec025414926bbdd1c927b8898dd0efc7ceb0256d807eab2437a71333",
+      "size": 314,
+      "mtime": 1792869678
+    },
+    ".nightshift-demo-red/evidence/1792869678113-4945d0e2.txt": {
+      "sha256": "4945d0e2dad39ce91a37b92589936f768185b6ed7e1fa10b5a4b4b674620870f",
+      "size": 125,
+      "mtime": 1792869678
+    },
+    ".nightshift-demo-red/evidence/1792869678116-4945d0e2.txt": {
+      "sha256": "4945d0e2dad39ce91a37b92589936f768185b6ed7e1fa10b5a4b4b674620870f",
+      "size": 125,
+      "mtime": 1792869678
+    },
+    ".nightshift-demo-red/evidence/1792869678118-4945d0e2.txt": {
+      "sha256": "4945d0e2dad39ce91a37b92589936f768185b6ed7e1fa10b5a4b4b674620870f",
+      "size": 125,
+      "mtime": 1792869678
+    },
+    ".nightshift-demo-red/evidence/1792869678120-bb4cbace.txt": {
+      "sha256": "bb4cbace47a925e8cce8d83d602626bc441d525688eae64535d8f3d0652945b8",
+      "size": 137,
+      "mtime": 1792869678
+    },
+    ".nightshift-demo-red/evidence/1792869678124-bb4cbace.txt": {
+      "sha256": "bb4cbace47a925e8cce8d83d602626bc441d525688eae64535d8f3d0652945b8",
+      "size": 137,
+      "mtime": 1792869678
+    },
+    ".nightshift-demo-red/evidence/1792869678126-bb4cbace.txt": {
+      "sha256": "bb4cbace47a925e8cce8d83d602626bc441d525688eae64535d8f3d0652945b8",
+      "size": 137,
+      "mtime": 1792869678
+    },
+    ".nightshift-demo-red/evidence/1792869678130-bb4cbace.txt": {
+      "sha256": "bb4cbace47a925e8cce8d83d602626bc441d525688eae64535d8f3d0652945b8",
+      "size": 137,
+      "mtime": 1792869678
+    },
+    ".nightshift-demo-red/evidence/1792869678134-01114d45.txt": {
+      "sha256": "01114d455272eb4c4745c56ec3799d6cc092f0a23e00cd3d1548e74729e2c4a7",
+      "size": 65,
+      "mtime": 1792869678
+    },
+    ".nightshift-demo-red/evidence/1792869678137-4945d0e2.txt": {
+      "sha256": "4945d0e2dad39ce91a37b92589936f768185b6ed7e1fa10b5a4b4b674620870f",
+      "size": 125,
+      "mtime": 1792869678
+    },
+    ".nightshift-demo-red/evidence/1792869678140-4945d0e2.txt": {
+      "sha256": "4945d0e2dad39ce91a37b92589936f768185b6ed7e1fa10b5a4b4b674620870f",
+      "size": 125,
+      "mtime": 1792869678
+    },
+    ".nightshift-demo-red/evidence/1792869678143-4945d0e2.txt": {
+      "sha256": "4945d0e2dad39ce91a37b92589936f768185b6ed7e1fa10b5a4b4b674620870f",
+      "size": 125,
+      "mtime": 1792869678
+    },
+    ".nightshift-demo-red/evidence/1792869678146-4945d0e2.txt": {
+      "sha256": "4945d0e2dad39ce91a37b92589936f768185b6ed7e1fa10b5a4b4b674620870f",
+      "size": 125,
+      "mtime": 1792869678
+    },
+    ".nightshift-demo-red/evidence/1792869678148-4945d0e2.txt": {
+      "sha256": "4945d0e2dad39ce91a37b92589936f768185b6ed7e1fa10b5a4b4b674620870f",
+      "size": 125,
+      "mtime": 1792869678
+    },
+    ".nightshift-demo-red/evidence/1792869678151-b7dd67ac.txt": {
+      "sha256": "b7dd67ac70ed57d58708dbac6d941d8eb6d30e323fdd2d6957fa6d0cd1cb38c4",
+      "size": 331,
+      "mtime": 1792869678
+    },
+    ".nightshift-demo-red/evidence/1792869678164-bb4cbace.txt": {
+      "sha256": "bb4cbace47a925e8cce8d83d602626bc441d525688eae64535d8f3d0652945b8",
+      "size": 137,
+      "mtime": 1792869678
+    },
+    ".nightshift-demo-red/evidence/1792869678167-bb4cbace.txt": {
+      "sha256": "bb4cbace47a925e8cce8d83d602626bc441d525688eae64535d8f3d0652945b8",
+      "size": 137,
+      "mtime": 1792869678
+    },
+    ".nightshift-demo-red/evidence/1792869678170-4945d0e2.txt": {
+      "sha256": "4945d0e2dad39ce91a37b92589936f768185b6ed7e1fa10b5a4b4b674620870f",
+      "size": 125,
+      "mtime": 1792869678
+    },
+    ".nightshift-demo-red/evidence/1792869678173-597a2a50.txt": {
+      "sha256": "597a2a507a7636b4adfe2f10c94ebf4d0d931005b04a21af495af2148c754003",
+      "size": 255,
+      "mtime": 1792869678
+    },
+    ".nightshift-demo-red/evidence/1792869678178-6dd14c2c.txt": {
+      "sha256": "6dd14c2c871d5667a87c8261f511cc5751c6f5ba362fc35621f228d53818e8bd",
+      "size": 97,
+      "mtime": 1792869678
+    },
+    ".nightshift-demo-red/evidence/1792869678181-6dd14c2c.txt": {
+      "sha256": "6dd14c2c871d5667a87c8261f511cc5751c6f5ba362fc35621f228d53818e8bd",
+      "size": 97,
+      "mtime": 1792869678
+    },
+    ".nightshift-demo-red/evidence/1792869678184-6dd14c2c.txt": {
+      "sha256": "6dd14c2c871d5667a87c8261f511cc5751c6f5ba362fc35621f228d53818e8bd",
+      "size": 97,
+      "mtime": 1792869678
+    },
+    ".nightshift-demo-red/evidence/1792869678188-01114d45.txt": {
+      "sha256": "01114d455272eb4c4745c56ec3799d6cc092f0a23e00cd3d1548e74729e2c4a7",
+      "size": 65,
+      "mtime": 1792869678
+    },
+    ".nightshift-demo-red/evidence/1792869678191-4945d0e2.txt": {
+      "sha256": "4945d0e2dad39ce91a37b92589936f768185b6ed7e1fa10b5a4b4b674620870f",
+      "size": 125,
+      "mtime": 1792869678
+    },
+    ".nightshift-demo-red/reports/flight-report.html": {
+      "sha256": "947baf0037e28bb30b1753215396027e09fc3e23bd660e37b4feabccd92c70d1",
+      "size": 28908,
+      "mtime": 1792869678
+    },
+    ".nightshift-demo-red/reports/flight-report.md": {
+      "sha256": "dcb20b3f5b916f1836e5a851edc7606aca82d86036b3ebe3788ef504363edcd6",
+      "size": 2895,
+      "mtime": 1792869678
+    },
+    ".nightshift-demo/evidence/1792869758931-4945d0e2.txt": {
+      "sha256": "4945d0e2dad39ce91a37b92589936f768185b6ed7e1fa10b5a4b4b674620870f",
+      "size": 125,
+      "mtime": 1792869758
+    },
+    ".nightshift-demo/evidence/1792869758934-4945d0e2.txt": {
+      "sha256": "4945d0e2dad39ce91a37b92589936f768185b6ed7e1fa10b5a4b4b674620870f",
+      "size": 125,
+      "mtime": 1792869758
+    },
+    ".nightshift-demo/evidence/1792869758937-4945d0e2.txt": {
+      "sha256": "4945d0e2dad39ce91a37b92589936f768185b6ed7e1fa10b5a4b4b674620870f",
+      "size": 125,
+      "mtime": 1792869758
+    },
+    ".nightshift-demo/evidence/1792869758939-bb4cbace.txt": {
+      "sha256": "bb4cbace47a925e8cce8d83d602626bc441d525688eae64535d8f3d0652945b8",
+      "size": 137,
+      "mtime": 1792869758
+    },
+    ".nightshift-demo/evidence/1792869758942-4945d0e2.txt": {
+      "sha256": "4945d0e2dad39ce91a37b92589936f768185b6ed7e1fa10b5a4b4b674620870f",
+      "size": 125,
+      "mtime": 1792869758
+    },
+    ".nightshift-demo/evidence/1792869758946-bbc09dd3.txt": {
+      "sha256": "bbc09dd3b6fba9e5a8b1758aef9b027e55ca1da4db490e4090affd979286d394",
+      "size": 313,
+      "mtime": 1792869758
+    },
+    ".nightshift-demo/evidence/1792869758950-4945d0e2.txt": {
+      "sha256": "4945d0e2dad39ce91a37b92589936f768185b6ed7e1fa10b5a4b4b674620870f",
+      "size": 125,
+      "mtime": 1792869758
+    },
+    ".nightshift-demo/evidence/1792869758952-4945d0e2.txt": {
+      "sha256": "4945d0e2dad39ce91a37b92589936f768185b6ed7e1fa10b5a4b4b674620870f",
+      "size": 125,
+      "mtime": 1792869758
+    },
+    ".nightshift-demo/evidence/1792869758955-46ca6ab2.txt": {
+      "sha256": "46ca6ab2ec025414926bbdd1c927b8898dd0efc7ceb0256d807eab2437a71333",
+      "size": 314,
+      "mtime": 1792869758
+    },
+    ".nightshift-demo/evidence/1792869758958-4945d0e2.txt": {
+      "sha256": "4945d0e2dad39ce91a37b92589936f768185b6ed7e1fa10b5a4b4b674620870f",
+      "size": 125,
+      "mtime": 1792869758
+    },
+    ".nightshift-demo/evidence/1792869758962-4945d0e2.txt": {
+      "sha256": "4945d0e2dad39ce91a37b92589936f768185b6ed7e1fa10b5a4b4b674620870f",
+      "size": 125,
+      "mtime": 1792869758
+    },
+    ".nightshift-demo/evidence/1792869758965-4945d0e2.txt": {
+      "sha256": "4945d0e2dad39ce91a37b92589936f768185b6ed7e1fa10b5a4b4b674620870f",
+      "size": 125,
+      "mtime": 1792869758
+    },
+    ".nightshift-demo/evidence/1792869758967-bb4cbace.txt": {
+      "sha256": "bb4cbace47a925e8cce8d83d602626bc441d525688eae64535d8f3d0652945b8",
+      "size": 137,
+      "mtime": 1792869758
+    },
+    ".nightshift-demo/evidence/1792869758970-bb4cbace.txt": {
+      "sha256": "bb4cbace47a925e8cce8d83d602626bc441d525688eae64535d8f3d0652945b8",
+      "size": 137,
+      "mtime": 1792869758
+    },
+    ".nightshift-demo/evidence/1792869758972-bb4cbace.txt": {
+      "sha256": "bb4cbace47a925e8cce8d83d602626bc441d525688eae64535d8f3d0652945b8",
+      "size": 137,
+      "mtime": 1792869758
+    },
+    ".nightshift-demo/evidence/1792869758974-bb4cbace.txt": {
+      "sha256": "bb4cbace47a925e8cce8d83d602626bc441d525688eae64535d8f3d0652945b8",
+      "size": 137,
+      "mtime": 1792869758
+    },
+    ".nightshift-demo/evidence/1792869758979-01114d45.txt": {
+      "sha256": "01114d455272eb4c4745c56ec3799d6cc092f0a23e00cd3d1548e74729e2c4a7",
+      "size": 65,
+      "mtime": 1792869758
+    },
+    ".nightshift-demo/evidence/1792869758982-4945d0e2.txt": {
+      "sha256": "4945d0e2dad39ce91a37b92589936f768185b6ed7e1fa10b5a4b4b674620870f",
+      "size": 125,
+      "mtime": 1792869758
+    },
+    ".nightshift-demo/evidence/1792869758985-4945d0e2.txt": {
+      "sha256": "4945d0e2dad39ce91a37b92589936f768185b6ed7e1fa10b5a4b4b674620870f",
+      "size": 125,
+      "mtime": 1792869758
+    },
+    ".nightshift-demo/evidence/1792869758987-4945d0e2.txt": {
+      "sha256": "4945d0e2dad39ce91a37b92589936f768185b6ed7e1fa10b5a4b4b674620870f",
+      "size": 125,
+      "mtime": 1792869758
+    },
+    ".nightshift-demo/evidence/1792869758990-4945d0e2.txt": {
+      "sha256": "4945d0e2dad39ce91a37b92589936f768185b6ed7e1fa10b5a4b4b674620870f",
+      "size": 125,
+      "mtime": 1792869758
+    },
+    ".nightshift-demo/evidence/1792869758992-4945d0e2.txt": {
+      "sha256": "4945d0e2dad39ce91a37b92589936f768185b6ed7e1fa10b5a4b4b674620870f",
+      "size": 125,
+      "mtime": 1792869758
+    },
+    ".nightshift-demo/evidence/1792869758996-9ab7d149.txt": {
+      "sha256": "9ab7d149d4ff70e972da3156b5502db9388dbc2ded807142cd35ba83487e044c",
+      "size": 290,
+      "mtime": 1792869758
+    },
+    ".nightshift-demo/evidence/1792869759008-bb4cbace.txt": {
+      "sha256": "bb4cbace47a925e8cce8d83d602626bc441d525688eae64535d8f3d0652945b8",
+      "size": 137,
+      "mtime": 1792869759
+    },
+    ".nightshift-demo/evidence/1792869759013-bb4cbace.txt": {
+      "sha256": "bb4cbace47a925e8cce8d83d602626bc441d525688eae64535d8f3d0652945b8",
+      "size": 137,
+      "mtime": 1792869759
+    },
+    ".nightshift-demo/evidence/1792869759015-4945d0e2.txt": {
+      "sha256": "4945d0e2dad39ce91a37b92589936f768185b6ed7e1fa10b5a4b4b674620870f",
+      "size": 125,
+      "mtime": 1792869759
+    },
+    ".nightshift-demo/evidence/1792869759017-597a2a50.txt": {
+      "sha256": "597a2a507a7636b4adfe2f10c94ebf4d0d931005b04a21af495af2148c754003",
+      "size": 255,
+      "mtime": 1792869759
+    },
+    ".nightshift-demo/evidence/1792869759021-6dd14c2c.txt": {
+      "sha256": "6dd14c2c871d5667a87c8261f511cc5751c6f5ba362fc35621f228d53818e8bd",
+      "size": 97,
+      "mtime": 1792869759
+    },
+    ".nightshift-demo/evidence/1792869759024-6dd14c2c.txt": {
+      "sha256": "6dd14c2c871d5667a87c8261f511cc5751c6f5ba362fc35621f228d53818e8bd",
+      "size": 97,
+      "mtime": 1792869759
+    },
+    ".nightshift-demo/evidence/1792869759027-6dd14c2c.txt": {
+      "sha256": "6dd14c2c871d5667a87c8261f511cc5751c6f5ba362fc35621f228d53818e8bd",
+      "size": 97,
+      "mtime": 1792869759
+    },
+    ".nightshift-demo/evidence/1792869759030-0c9e317b.txt": {
+      "sha256": "0c9e317bef6e7041dcd5b7ed4e6dbe0aca6e6467c49d2cd13a0d65bfd7c5cd59",
+      "size": 283,
+      "mtime": 1792869759
+    },
+    ".nightshift-demo/evidence/1792869759034-01114d45.txt": {
+      "sha256": "01114d455272eb4c4745c56ec3799d6cc092f0a23e00cd3d1548e74729e2c4a7",
+      "size": 65,
+      "mtime": 1792869759
+    },
+    ".nightshift-demo/evidence/1792869759037-4945d0e2.txt": {
+      "sha256": "4945d0e2dad39ce91a37b92589936f768185b6ed7e1fa10b5a4b4b674620870f",
+      "size": 125,
+      "mtime": 1792869759
+    },
+    ".nightshift-demo/reports/flight-report.html": {
+      "sha256": "0f0d2b36b43f6c01cb84a440d393ae39100a84c01013171d15328b8c5591f0cf",
+      "size": 28662,
+      "mtime": 1792869759
+    },
+    ".nightshift-demo/reports/flight-report.md": {
+      "sha256": "68ce0bc789bc62a90504d1c9f8e2b10f43f2d0e6fcb13c61c40e450a5c3a2cff",
+      "size": 2704,
+      "mtime": 1792869759
+    },
+    ".github/workflows/ci.yml": {
+      "sha256": "9f3d440ec9bbe3b7c610a23f0d482c29c233bb168a1f32e9e52fb8afe893da34",
+      "size": 968,
+      "mtime": 1792869083
+    }
+  }
+}

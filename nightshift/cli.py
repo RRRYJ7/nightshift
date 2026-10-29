@@ -481,6 +481,57 @@ def _can_write(p: Path) -> bool:
         return False
 
 
+def cmd_diff(args: argparse.Namespace) -> int:
+    st = _need(args)
+    d = analysis.changes(st)
+    if args.json:
+        import json
+
+        print(json.dumps(d, ensure_ascii=False, indent=2, default=str))
+        return 0 if d.get("available") else 1
+    if not d.get("available"):
+        _head("what changed", "no snapshot")
+        print(f"  {util.yellow('!')} {d.get('reason', 'no baseline')}")
+        print(util.grey("  take one now with:  nsh baseline"))
+        print()
+        return 1
+
+    s = d["summary"]
+    _head("what changed", f"{s['total']} file(s) since {str(d.get('baseline_ts', ''))[:19]}")
+    if not d["rows"]:
+        print(util.grey("  nothing changed since the snapshot"))
+        print()
+        return 0
+    print("  " + util.grey("ST") + "  " + util.pad(util.grey("FILE"), 54)
+          + util.grey("      +/-   AUDITED AFTER"))
+    for r in d["rows"]:
+        mark = {"added": util.green("A"), "modified": util.yellow("M"), "deleted": util.red("D")}.get(r["status"], "?")
+        lines = "  -  " if r["added"] < 0 else f"+{r['added']}/-{r['removed']}"
+        if r["status"] == "deleted":
+            audit = util.grey("n/a")
+        else:
+            audit = util.green("yes") if r["audited_after"] else util.red("no")
+        extra = util.grey("  " + ",".join(r["audited_by"])) if r.get("audited_by") else ""
+        print(f"  {mark}  {util.pad(util.one_line(r['path'], 52), 54)} {lines:>8}   {audit}{extra}")
+    print()
+    print(f"  {s['modified']} modified · {s['added']} added · {s['deleted']} deleted"
+          f" · {util.red(str(s['unaudited']))} not checked after their last edit")
+    print(util.grey("  line counts come from git when the project is a repository"))
+    print()
+    return 0
+
+
+def cmd_baseline(args: argparse.Namespace) -> int:
+    st = _need(args)
+    data = st.write_baseline()
+    _head("baseline snapshot", f"{len(data['files'])} file(s)")
+    print(_kv("git head", data.get("git_head") or util.grey("not a git repository")))
+    print(_kv("written", data["ts"]))
+    print(util.grey("  nsh diff compares the project against this snapshot"))
+    print()
+    return 0
+
+
 def cmd_bench(args: argparse.Namespace) -> int:
     from . import bench
 
@@ -608,6 +659,13 @@ def build_parser() -> argparse.ArgumentParser:
     q.add_argument("--json", action="store_true")
     q.add_argument("--strict", action="store_true", help="also fail when an artefact is missing")
     q.set_defaults(func=cmd_verify)
+
+    q = sub.add_parser("diff", help="what changed since the shift started, and what checked it")
+    q.add_argument("--json", action="store_true")
+    q.set_defaults(func=cmd_diff)
+
+    q = sub.add_parser("baseline", help="(re)snapshot the project so `nsh diff` has something to compare")
+    q.set_defaults(func=cmd_baseline)
 
     q = sub.add_parser("doctor", help="check the environment")
     q.set_defaults(func=cmd_doctor)

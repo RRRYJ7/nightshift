@@ -7,9 +7,11 @@ from __future__ import annotations
 
 import json
 import os
+import shutil
 import subprocess
 import sys
 import tempfile
+import uuid
 import unittest
 from datetime import timedelta
 from pathlib import Path
@@ -44,6 +46,36 @@ def ev(i: int, kind: str, intent: str, *, proof: bool = True, target: str = "",
     if check is not None:
         row["check"] = check
     return row
+
+
+
+# Temp dirs live inside the repo: the sandbox used by the harness denies writes
+# to the system temp dir, and CI checkouts are writable anyway.
+TMP_ROOT = ROOT / ".testtmp"
+
+
+class _Tmp:
+    """A temp dir created with a normal ACL.
+
+    tempfile.mkdtemp() creates a 0700 directory, and the harness sandbox cannot
+    create children inside it; plain mkdir inherits the parent's ACL.
+    """
+
+    def __init__(self):
+        TMP_ROOT.mkdir(parents=True, exist_ok=True)
+        self.path = TMP_ROOT / ("t" + uuid.uuid4().hex[:10])
+        self.path.mkdir()
+
+    def __enter__(self):
+        return self.path
+
+    def __exit__(self, *exc):
+        shutil.rmtree(self.path, ignore_errors=True)
+        return False
+
+
+def _tmpdir():
+    return _Tmp()
 
 
 CONTRACT = {
@@ -247,6 +279,51 @@ class TestTargets(unittest.TestCase):
         self.assertEqual([r["target"] for r in analysis.targets(events)], ["a.py"])
 
 
+class TestChanges(unittest.TestCase):
+    def test_diff_reports_added_modified_deleted_and_audit(self):
+        with _tmpdir() as tmp:
+            root = Path(tmp)
+            (root / "a.txt").write_text("one\n", encoding="utf-8")
+            (root / "c.txt").write_text("gone\n", encoding="utf-8")
+            st = Store(root / ".nightshift")
+            st.init(goal="x", hours=1)
+
+            (root / "a.txt").write_text("one\ntwo\n", encoding="utf-8")
+            (root / "b.txt").write_text("new\n", encoding="utf-8")
+            (root / "c.txt").unlink()
+            st.append({"kind": "check", "intent": "check d1", "evidence": [],
+                       "check": {"id": "d1", "passed": True, "exit": 0}})
+
+            d = analysis.changes(st)
+            self.assertTrue(d["available"])
+            by_path = {r["path"]: r for r in d["rows"]}
+            self.assertEqual(by_path["a.txt"]["status"], "modified")
+            self.assertEqual(by_path["b.txt"]["status"], "added")
+            self.assertEqual(by_path["c.txt"]["status"], "deleted")
+            self.assertEqual(d["summary"]["total"], 3)
+
+    def test_missing_baseline_is_reported_not_guessed(self):
+        with _tmpdir() as tmp:
+            root = Path(tmp)
+            st = Store(root / ".nightshift")
+            st.init(goal="x", hours=1)
+            (st.root / "baseline.json").unlink()
+            d = analysis.changes(st)
+            self.assertFalse(d["available"])
+            self.assertIn("baseline", d["reason"])
+
+    def test_baseline_written_at_init(self):
+        with _tmpdir() as tmp:
+            root = Path(tmp)
+            (root / "a.py").write_text("x = 1\n", encoding="utf-8")
+            st = Store(root / ".nightshift")
+            st.init(goal="x", hours=1)
+            base = st.load_baseline()
+            self.assertIsNotNone(base)
+            self.assertIn("a.py", base["files"])
+            self.assertTrue(base["files"]["a.py"]["sha256"])
+
+
 # --------------------------------------------------------------------------- #
 # convergence
 # --------------------------------------------------------------------------- #
@@ -273,7 +350,7 @@ class TestConvergence(unittest.TestCase):
 
 class TestStore(unittest.TestCase):
     def test_roundtrip(self):
-        with tempfile.TemporaryDirectory() as tmp:
+        with _tmpdir() as tmp:
             st = Store(Path(tmp) / ".nightshift")
             st.init(goal="do a thing", hours=8)
             st.add_done("it works", cmd=["true"])
@@ -284,7 +361,7 @@ class TestStore(unittest.TestCase):
             self.assertEqual(st.load_contract()["goal"], "do a thing")
 
     def test_evidence_is_hashed_and_stored(self):
-        with tempfile.TemporaryDirectory() as tmp:
+        with _tmpdir() as tmp:
             st = Store(Path(tmp) / ".nightshift")
             st.init(goal="x", hours=1)
             item = st.save_evidence("hello world\n", kind="cmd", label="t")
@@ -297,7 +374,7 @@ class TestStore(unittest.TestCase):
         """The receipt has to be verifiable: hash what you saved, save what you hashed."""
         import hashlib
 
-        with tempfile.TemporaryDirectory() as tmp:
+        with _tmpdir() as tmp:
             st = Store(Path(tmp) / ".nightshift")
             st.init(goal="x", hours=1)
             item = st.save_evidence("line one\nline two\n", kind="cmd")
@@ -306,7 +383,7 @@ class TestStore(unittest.TestCase):
             self.assertEqual(len(data), item["bytes"])
 
     def test_huge_output_is_capped_not_buffered(self):
-        with tempfile.TemporaryDirectory() as tmp:
+        with _tmpdir() as tmp:
             st = Store(Path(tmp) / ".nightshift")
             st.init(goal="x", hours=1)
             item = st.save_evidence("A" * (store_mod.MAX_CAPTURE * 3), kind="cmd")
@@ -315,7 +392,7 @@ class TestStore(unittest.TestCase):
             self.assertLess(item["bytes"], store_mod.MAX_CAPTURE + 200)
 
     def test_init_twice_needs_force(self):
-        with tempfile.TemporaryDirectory() as tmp:
+        with _tmpdir() as tmp:
             st = Store(Path(tmp) / ".nightshift")
             st.init(goal="x", hours=1)
             with self.assertRaises(store_mod.NightshiftError):
@@ -326,7 +403,7 @@ class TestStore(unittest.TestCase):
 
 class TestReport(unittest.TestCase):
     def test_html_contains_the_verdict_and_the_unproven_section(self):
-        with tempfile.TemporaryDirectory() as tmp:
+        with _tmpdir() as tmp:
             st = Store(Path(tmp) / ".nightshift")
             st.init(goal="ship it", hours=8)
             st.add_done("tests", cmd=["true"])
@@ -340,7 +417,7 @@ class TestReport(unittest.TestCase):
             self.assertGreater(len(text), 5000)
 
     def test_html_escapes_event_text(self):
-        with tempfile.TemporaryDirectory() as tmp:
+        with _tmpdir() as tmp:
             st = Store(Path(tmp) / ".nightshift")
             st.init(goal="ship it <script>alert(1)</script>", hours=8)
             st.add_done("tests", cmd=["true"])
@@ -353,7 +430,7 @@ class TestReport(unittest.TestCase):
             self.assertIn("&lt;script&gt;", text)
 
     def test_markdown_renders(self):
-        with tempfile.TemporaryDirectory() as tmp:
+        with _tmpdir() as tmp:
             st = Store(Path(tmp) / ".nightshift")
             st.init(goal="ship it", hours=8)
             a = analysis.analyse(st)
@@ -361,7 +438,7 @@ class TestReport(unittest.TestCase):
             self.assertIn("# NIGHTSHIFT", out.read_text(encoding="utf-8"))
 
     def test_report_survives_null_timestamps(self):
-        with tempfile.TemporaryDirectory() as tmp:
+        with _tmpdir() as tmp:
             st = Store(Path(tmp) / ".nightshift")
             st.init(goal="ship it", hours=8)
             st.append({"kind": "step", "intent": "hand edited", "ts": None, "evidence": []})
@@ -370,7 +447,7 @@ class TestReport(unittest.TestCase):
             self.assertIn("Flight report", text)
 
     def test_malformed_log_lines_are_skipped(self):
-        with tempfile.TemporaryDirectory() as tmp:
+        with _tmpdir() as tmp:
             st = Store(Path(tmp) / ".nightshift")
             st.init(goal="ship it", hours=8)
             st.append({"kind": "step", "intent": "one", "evidence": []})
@@ -383,7 +460,7 @@ class TestReport(unittest.TestCase):
 
 class TestVerify(unittest.TestCase):
     def test_intact_capture_verifies(self):
-        with tempfile.TemporaryDirectory() as tmp:
+        with _tmpdir() as tmp:
             st = Store(Path(tmp) / ".nightshift")
             st.init(goal="x", hours=1)
             item = st.save_evidence("true output\n", kind="cmd")
@@ -393,7 +470,7 @@ class TestVerify(unittest.TestCase):
             self.assertFalse(r["tampered"])
 
     def test_tampered_capture_is_caught(self):
-        with tempfile.TemporaryDirectory() as tmp:
+        with _tmpdir() as tmp:
             st = Store(Path(tmp) / ".nightshift")
             st.init(goal="x", hours=1)
             item = st.save_evidence("true output\n", kind="cmd")
@@ -404,7 +481,7 @@ class TestVerify(unittest.TestCase):
             self.assertEqual(len(r["ok"]), 0)
 
     def test_edited_project_file_is_changed_not_tampered(self):
-        with tempfile.TemporaryDirectory() as tmp:
+        with _tmpdir() as tmp:
             root = Path(tmp)
             st = Store(root / ".nightshift")
             st.init(goal="x", hours=1)
@@ -424,7 +501,7 @@ class TestVerify(unittest.TestCase):
 
 class TestDemoAndBench(unittest.TestCase):
     def test_demo_builds_a_complete_run(self):
-        with tempfile.TemporaryDirectory() as tmp:
+        with _tmpdir() as tmp:
             st = demo.build(Path(tmp) / ".nightshift-demo")
             a = analysis.analyse(st)
             self.assertTrue(a["gate"].ok)
@@ -433,7 +510,7 @@ class TestDemoAndBench(unittest.TestCase):
             self.assertTrue(a["findings"])  # the scripted churn + silent run
 
     def test_red_demo_shows_unproven_criteria(self):
-        with tempfile.TemporaryDirectory() as tmp:
+        with _tmpdir() as tmp:
             st = demo.build(Path(tmp) / ".nightshift-demo-red", outcome="red")
             a = analysis.analyse(st)
             self.assertFalse(a["gate"].ok)
@@ -462,8 +539,21 @@ class TestCli(unittest.TestCase):
             encoding="utf-8", errors="replace", timeout=120,
         )
 
+    def _init(self, cwd: str, goal: str = "x") -> subprocess.CompletedProcess:
+        """init must succeed in the temp dir.
+
+        Without this assertion a failed init leaves no local plan, and the next
+        command walks *up* and writes into whatever .nightshift is above —
+        which is how a sandboxed test run once polluted this repository's own
+        flight plan with d6..d9.
+        """
+        r = self._run(cwd, "init", "--goal", goal, "--hours", "1")
+        self.assertEqual(r.returncode, 0, "init failed: " + r.stdout + r.stderr)
+        self.assertTrue((Path(cwd) / ".nightshift" / "contract.json").exists())
+        return r
+
     def test_full_shift(self):
-        with tempfile.TemporaryDirectory() as tmp:
+        with _tmpdir() as tmp:
             r = self._run(tmp, "init", "--goal", "ship a tiny CLI", "--hours", "2")
             self.assertEqual(r.returncode, 0, r.stderr)
             self.assertTrue((Path(tmp) / ".nightshift" / "contract.json").exists())
@@ -494,16 +584,16 @@ class TestCli(unittest.TestCase):
             self.assertTrue(payload["gate"]["ok"])
 
     def test_failing_check_returns_one(self):
-        with tempfile.TemporaryDirectory() as tmp:
-            self._run(tmp, "init", "--goal", "x", "--hours", "1")
+        with _tmpdir() as tmp:
+            self._init(tmp)
             self._run(tmp, "done", "add", "must fail", "--",
                       sys.executable, "-c", "import sys; sys.exit(3)")
             r = self._run(tmp, "check", "d1")
             self.assertEqual(r.returncode, 1)
 
     def test_check_all_runs_every_criterion(self):
-        with tempfile.TemporaryDirectory() as tmp:
-            self._run(tmp, "init", "--goal", "x", "--hours", "1")
+        with _tmpdir() as tmp:
+            self._init(tmp)
             for name in ("one", "two", "three"):
                 self._run(tmp, "done", "add", name, "--", sys.executable, "-c", "print('ok')")
             r = self._run(tmp, "check", "--all")
@@ -513,22 +603,24 @@ class TestCli(unittest.TestCase):
             self.assertEqual(gate.returncode, 0, gate.stdout + gate.stderr)
 
     def test_run_captures_output_as_evidence(self):
-        with tempfile.TemporaryDirectory() as tmp:
-            self._run(tmp, "init", "--goal", "x", "--hours", "1")
+        with _tmpdir() as tmp:
+            self._init(tmp)
             r = self._run(tmp, "run", "--", sys.executable, "-c", "print('hello-evidence')")
             self.assertEqual(r.returncode, 0, r.stderr)
             events = (Path(tmp) / ".nightshift" / "events.jsonl").read_text(encoding="utf-8")
             self.assertIn("hello-evidence", events)
 
     def test_gate_without_contract_is_a_user_error(self):
-        with tempfile.TemporaryDirectory() as tmp:
-            r = self._run(tmp, "gate")
+        with _tmpdir() as tmp:
+            # --dir, because the test temp dir lives inside this repository and
+            # upward discovery would otherwise find the repo's own shift
+            r = self._run(tmp, "--dir", str(Path(tmp) / ".nightshift"), "gate")
             self.assertEqual(r.returncode, 2)
             self.assertIn("no flight plan", r.stderr)
 
     def test_verify_returns_one_when_captured_evidence_was_edited(self):
-        with tempfile.TemporaryDirectory() as tmp:
-            self._run(tmp, "init", "--goal", "x", "--hours", "1")
+        with _tmpdir() as tmp:
+            self._init(tmp)
             self._run(tmp, "run", "--", sys.executable, "-c", "print('evidence')")
             ok = self._run(tmp, "verify")
             self.assertEqual(ok.returncode, 0, ok.stdout + ok.stderr)

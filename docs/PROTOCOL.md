@@ -134,6 +134,29 @@ An evidence item is a claim about bytes.
 
 ---
 
+## 3.5 The change report
+
+`nsh init` snapshots the project into `.nightshift/baseline.json` (path -> sha256 +
+mtime, skipping `.git`, `node_modules`, build output and anything over 2 MB).
+`nsh diff` re-hashes and reports, per file:
+
+- **status** — added / modified / deleted since the snapshot;
+- **lines** — from `git diff --numstat <head-at-init>` when the project is a git
+  repository, otherwise omitted and labelled as such;
+- **audited after?** — whether any `check` event happened *after* that file's last
+  modification.
+
+The last column is a heuristic and the report says so: it proves something was
+checked after the edit, not that the check exercised that file. Criteria do not
+declare which files they cover, and inventing a mapping would be worse than an
+honest approximation.
+
+The flight report renders the same table under **"What changed, and what looked
+at it"**, because the first question about an unattended run is what it touched,
+and the second is what looked at it afterwards.
+
+---
+
 ## 4. The gate
 
 `nsh gate` exits `0` if and only if **all** of the following hold:

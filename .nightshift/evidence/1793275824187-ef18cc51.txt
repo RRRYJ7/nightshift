@@ -1,0 +1,10 @@
+
+  assets check
+  ------------------------------------------------------------
+  ok docs/demo.gif                         925 KiB  terminal demo for the README
+  ok docs/flight-report.png                246 KiB  screenshot of the rendered flight report
+  ok docs/flight-report-red.png            209 KiB  the report for a failed shift
+  ok docs/nightshift-vertical.mp4         3939 KiB  1080x1920 promo video
+  ok docs/nightshift-wide.mp4              723 KiB  1920x1080 English trailer
+  ------------------------------------------------------------
+  all demo assets present

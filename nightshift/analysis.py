@@ -524,6 +524,116 @@ def brief(contract: dict, events: Sequence[dict], stats: dict, g: GateResult,
 
 
 # --------------------------------------------------------------------------- #
+# what changed, and what looked at it
+# --------------------------------------------------------------------------- #
+
+def changes(store, limit: int = 40) -> dict[str, Any]:
+    """Diff the project against the snapshot taken at `nsh init`.
+
+    Two questions a reviewer asks about an unattended run, in order:
+
+    1. what did it actually change?
+    2. did anything check that change afterwards?
+
+    The first is a file diff against the baseline. The second is a heuristic:
+    a file counts as audited if any `check` event happened after its last
+    modification time. It is not proof that the check covered that file, and the
+    report says so.
+    """
+    from . import store as store_mod
+
+    base = store.load_baseline()
+    if not base:
+        return {
+            "available": False,
+            "reason": "no baseline was recorded for this shift",
+            "rows": [],
+            "summary": {},
+        }
+
+    project = store.root.resolve().parent
+    old = base.get("files") or {}
+    try:
+        now = store_mod.scan_project(project)
+    except OSError:
+        now = {}
+
+    added = sorted(set(now) - set(old))
+    deleted = sorted(set(old) - set(now))
+    modified = sorted(
+        p for p in now
+        if p in old and now[p].get("sha256") and now[p]["sha256"] != old[p].get("sha256")
+    )
+
+    numstat = {}
+    head = base.get("git_head")
+    if head:
+        numstat = store_mod.git_numstat(project, head)
+
+    checks: list[tuple[float, str]] = []
+    for ev in store.events():
+        if ev.get("kind") == "check":
+            try:
+                checks.append((util.parse_iso(ev.get("ts", "")).timestamp(), (ev.get("check") or {}).get("id", "?")))
+            except (ValueError, TypeError):
+                continue
+
+    def _audit(mtime: float) -> list[str]:
+        return [cid for ts, cid in checks if ts > mtime]
+
+    def _line_count(path: str) -> int:
+        try:
+            p = project / path
+            if p.stat().st_size > 512_000:
+                return -1
+            with open(p, "r", encoding="utf-8", errors="replace") as fh:
+                return sum(1 for _ in fh)
+        except OSError:
+            return -1
+
+    rows: list[dict[str, Any]] = []
+    for path, status in (
+        [(p, "added") for p in added] + [(p, "modified") for p in modified] + [(p, "deleted") for p in deleted]
+    ):
+        meta = now.get(path) or old.get(path) or {}
+        mtime = float(meta.get("mtime") or 0)
+        by = _audit(mtime) if status != "deleted" else []
+        plus, minus = numstat.get(path, (-1, -1))
+        if plus < 0 and status == "added":
+            n = _line_count(path)
+            plus, minus = (n, 0) if n >= 0 else (-1, -1)
+        rows.append({
+            "path": path,
+            "status": status,
+            "added": plus,
+            "removed": minus,
+            "last_edit": util.iso(datetime.fromtimestamp(mtime).astimezone()) if mtime else "",
+            "mtime": mtime,
+            "audited_after": bool(by),
+            "audited_by": by[:4],
+        })
+
+    order = {"modified": 0, "added": 1, "deleted": 2}
+    rows.sort(key=lambda r: (order.get(r["status"], 3), -(r["added"] + r["removed"]), r["path"]))
+    shown = rows[:limit]
+
+    return {
+        "available": True,
+        "baseline_ts": base.get("ts", ""),
+        "git_head": head,
+        "rows": shown,
+        "total": len(rows),
+        "summary": {
+            "added": len(added),
+            "modified": len(modified),
+            "deleted": len(deleted),
+            "total": len(rows),
+            "unaudited": sum(1 for r in rows if r["status"] != "deleted" and not r["audited_after"]),
+        },
+    }
+
+
+# --------------------------------------------------------------------------- #
 # one call that gathers everything the renderer needs
 # --------------------------------------------------------------------------- #
 
@@ -546,5 +656,6 @@ def analyse(store) -> dict[str, Any]:
         "brief": brief(contract, events, stats, g, conv, findings),
         "hourly": hourly(events),
         "targets": targets(events),
+        "changes": changes(store),
         "coverage_series": coverage_series(events),
     }

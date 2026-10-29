@@ -112,6 +112,7 @@ def model(analysis: dict[str, Any], project: str = "") -> dict[str, Any]:
         "events": analysis["events"],
         "hourly": analysis["hourly"],
         "targets": analysis.get("targets", []),
+        "changes": analysis.get("changes", {}),
         "coverage": analysis["coverage_series"],
         "generated": util.iso(),
     }
@@ -210,6 +211,47 @@ def render_html(m: dict[str, Any]) -> str:
     non_goals = "".join(f"<li>{_e(x)}</li>" for x in m["non_goals"]) or "<li class='empty'>not declared</li>"
     risks = "".join(f"<li>{_e(x)}</li>" for x in m["risks"]) or "<li class='empty'>not declared</li>"
 
+    ch = m.get("changes") or {}
+    if not ch.get("available"):
+        changes_html = (
+            '<div class="empty">no baseline snapshot was taken at the start of this shift, '
+            'so a trustworthy diff is impossible. Take one with <span class="mono">nsh baseline</span> '
+            'before the next run.</div>'
+        )
+    elif not ch.get("rows"):
+        changes_html = '<div class="empty">nothing in the project changed during this shift</div>'
+    else:
+        s = ch["summary"]
+        body = []
+        for r in ch["rows"]:
+            mark = {"added": '<span class="ok">A</span>',
+                    "modified": '<span style="color:#d97706;font-weight:700">M</span>',
+                    "deleted": '<span class="no">D</span>'}.get(r["status"], "?")
+            if r["status"] == "deleted":
+                audit = '<span class="empty">n/a</span>'
+            else:
+                audit = '<span class="ok">checked after</span>' if r["audited_after"] else '<span class="no">not checked after</span>'
+            lines = "—" if r["added"] < 0 else f'+{r["added"]} / −{r["removed"]}'
+            by = f' <span class="mono" style="color:#94a3b8">{_e(",".join(r["audited_by"]))}</span>' if r.get("audited_by") else ""
+            body.append(
+                f'<tr><td>{mark}</td><td class="mono">{_e(r["path"])}</td>'
+                f'<td class="mono">{_e(lines)}</td><td class="mono">{_e(_when(r.get("last_edit", "")))}</td>'
+                f'<td>{audit}{by}</td></tr>'
+            )
+        changes_html = (
+            f'<div style="font-size:13px;color:#475569;margin-bottom:10px">'
+            f'{s["modified"]} modified · {s["added"]} added · {s["deleted"]} deleted · '
+            f'<strong>{s["unaudited"]}</strong> changed file(s) were never checked afterwards'
+            f'</div>'
+            '<table><tr><th></th><th>file</th><th>lines</th><th>last edit</th><th>audited after?</th></tr>'
+            + "".join(body)
+            + "</table>"
+            + '<div style="font-size:12px;color:#94a3b8;margin-top:10px">'
+              'Diff against the snapshot taken at <span class="mono">nsh init</span>. Line counts come from git '
+              'when the project is a repository. "Checked after" means a check event happened after the file\'s '
+              'last modification — it is a heuristic, not proof that the check covered that file.</div>'
+        )
+
     return f"""<!doctype html>
 <html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -274,6 +316,11 @@ def render_html(m: dict[str, Any]) -> str:
     <tr><th>target</th><th>touches</th><th>last touched</th><th>verified after?</th></tr>
     {target_rows}
   </table></div>
+</section>
+
+<section>
+  <h2>What changed, and what looked at it</h2>
+  <div class="card">{changes_html}</div>
 </section>
 
 <section class="grid2">
@@ -368,6 +415,28 @@ def render_md(m: dict[str, Any]) -> str:
             )
     else:
         lines.append("_no step recorded a --target_")
+    lines += ["", "## What changed, and what looked at it", ""]
+    ch = m.get("changes") or {}
+    if not ch.get("available"):
+        lines.append("_no baseline snapshot was taken at the start of this shift — run `nsh baseline` first_")
+    elif not ch.get("rows"):
+        lines.append("_nothing in the project changed during this shift_")
+    else:
+        s = ch["summary"]
+        lines.append(
+            "**%d modified · %d added · %d deleted · %d never checked afterwards**"
+            % (s["modified"], s["added"], s["deleted"], s["unaudited"])
+        )
+        lines.append("")
+        lines += ["| | file | lines | last edit | audited after |", "| --- | --- | --- | --- | --- |"]
+        for r in ch["rows"]:
+            mark = {"added": "A", "modified": "M", "deleted": "D"}.get(r["status"], "?")
+            lines_txt = "—" if r["added"] < 0 else "+%d / −%d" % (r["added"], r["removed"])
+            audit = "n/a" if r["status"] == "deleted" else ("yes" if r["audited_after"] else "**no**")
+            lines.append("| %s | `%s` | %s | %s | %s |"
+                         % (mark, r["path"], lines_txt, _when(r.get("last_edit", "")), audit))
+        lines.append("")
+        lines.append("_Diff against the snapshot taken at `nsh init`; line counts come from git when available._")
     lines += ["", "## Convergence", "", f"{m['convergence'].get('state')} — {m['convergence'].get('why', '')}", ""]
     lines += ["## Non-goals", ""] + [f"- {x}" for x in m["non_goals"]] + [""]
     lines += ["## Known risks", ""] + [f"- {x}" for x in m["risks"]] + [""]

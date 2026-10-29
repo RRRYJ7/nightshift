@@ -1,0 +1,2 @@
+--- stderr ---
+python: can't open file 'C:\\Users\\liuchao\\Documents\\deepseek-harness\\default-workspace\\nightshift\\.testtmp\\tmpmvzuxzfo\\tools\\check_assets.py': [Errno 2] No such file or directory

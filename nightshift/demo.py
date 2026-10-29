@@ -7,7 +7,9 @@ Only the *content* of the run is scripted.
 
 from __future__ import annotations
 
+import os
 import shutil
+import subprocess
 from datetime import timedelta
 from pathlib import Path
 
@@ -150,12 +152,87 @@ def _evidence_for(intent: str) -> str:
     )
 
 
+DEMO_FILES = {
+    "Cargo.toml": '[package]\nname = "reports"\nversion = "0.3.1"\nedition = "2021"\n',
+    "src/parser.rs": "// csv parser\npub fn parse(input: &str) -> Vec<Row> {\n    todo!()\n}\n",
+    "src/render.rs": "// template renderer\npub fn render(name: &str) -> String {\n    format!(\"<{}>\", name)\n}\n",
+    "src/legacy.rs": "// superseded by parser.rs\nfn old_parse() {}\n",
+    "README.md": "# reports\n\nCSV to PDF.\n",
+}
+
+
+def _write_project(project: Path) -> None:
+    for rel, body in DEMO_FILES.items():
+        p = project / rel
+        p.parent.mkdir(parents=True, exist_ok=True)
+        p.write_text(body, encoding="utf-8", newline="\n")
+
+
+def _mutate_project(project: Path, start) -> None:
+    """What the night shift would plausibly have changed, as real bytes on disk.
+
+    mtimes are backdated onto the scripted timeline, otherwise every file looks
+    edited *after* the last check and the audit column is meaningless.
+    """
+    def touch(rel: str, minutes: int) -> None:
+        p = project / rel
+        ts = (start + timedelta(minutes=minutes)).timestamp()
+        try:
+            os.utime(p, (ts, ts))
+        except OSError:
+            pass
+
+    (project / "src/parser.rs").write_text(
+        "// csv parser\npub fn parse(input: &str) -> Vec<Row> {\n"
+        "    let rows = split_quoted(input);\n    rows.into_iter().map(Row::new).collect()\n}\n"
+        "fn split_quoted(s: &str) -> Vec<String> {\n    // handles CRLF, BOM and quoted commas\n"
+        "    s.lines().map(|l| l.to_string()).collect()\n}\n",
+        encoding="utf-8", newline="\n")
+    (project / "src/render.rs").write_text(
+        "// template renderer (spacing tuned all night)\npub fn render(name: &str) -> String {\n"
+        "    format!(\"<{} class=\\\"tpl\\\">\", name)\n}\n\npub const BASE_SPACING: f32 = 1.25;\n",
+        encoding="utf-8", newline="\n")
+    (project / "src/cli.rs").write_text(
+        "// added during the shift\npub struct Args {\n    pub input: String,\n"
+        "    pub template: String,\n    pub out: String,\n}\n",
+        encoding="utf-8", newline="\n")
+    (project / "README.md").write_text(
+        "# reports\n\nCSV to PDF.\n\n## Quickstart\n\n```bash\nreports --input in.csv "
+        "--template invoice --out out.pdf\n```\n", encoding="utf-8", newline="\n")
+    legacy = project / "src/legacy.rs"
+    if legacy.exists():
+        legacy.unlink()
+
+    touch("src/parser.rs", 40)
+    touch("src/cli.rs", 62)
+    touch("src/render.rs", 120)
+    touch("README.md", 470)
+
+
+def _git_baseline(project: Path) -> None:
+    """Commit the demo project, so the change report can show real line counts."""
+    cmds = [
+        ["git", "init", "-q"],
+        ["git", "add", "-A"],
+        ["git", "-c", "user.email=demo@nightshift", "-c", "user.name=demo",
+         "commit", "-qm", "base"],
+    ]
+    try:
+        for c in cmds:
+            subprocess.run(c, cwd=str(project), capture_output=True, timeout=20)
+    except (OSError, subprocess.SubprocessError):
+        pass
+
+
 def build(dest: str | Path = ".nightshift-demo", outcome: str = "green") -> Store:
     root = Path(dest)
     if root.exists():
         shutil.rmtree(root)
-    root.mkdir(parents=True)
-    st = Store(root)
+    project = root / "project"
+    project.mkdir(parents=True)
+    _write_project(project)
+    _git_baseline(project)
+    st = Store(project / ".nightshift")
 
     start = util.now() - timedelta(minutes=TOTAL_MINUTES)
     contract = {
@@ -183,6 +260,7 @@ def build(dest: str | Path = ".nightshift-demo", outcome: str = "green") -> Stor
         ],
     }
     st.save_contract(contract)
+    st.write_baseline()  # the demo writes the contract by hand, so snapshot here too
     st.append({"kind": "init", "intent": DEMO_GOAL, "evidence": []}, ts=start)
 
     total_weight = sum(float(w) for _, _, w in SCRIPT) or 1.0
@@ -220,6 +298,7 @@ def build(dest: str | Path = ".nightshift-demo", outcome: str = "green") -> Stor
             st.append({"kind": "tick", "intent": "checkpoint", "progress": float(payload),
                        "target": "", "evidence": []}, ts=t)
         # "wait" only consumes wall-clock
+    _mutate_project(project, start)
     return st
 
 

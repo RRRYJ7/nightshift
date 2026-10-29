@@ -126,6 +126,7 @@ one; the whole point of the night shift is that the morning is not a surprise.
 ```bash
 nsh check --all       # re-run every criterion, right before you write the report
 nsh verify            # every digest still matches the bytes on disk
+nsh diff              # what changed since the plan, and whether a check followed
 nsh report            # .nightshift/reports/flight-report.html  (+ --md)
 nsh brief             # the ten lines the human actually reads
 ```

@@ -7,6 +7,9 @@ dist/
 .venv/
 venv/
 
+# test scratch
+.testtmp/
+
 # demo scratch
 .nightshift-demo/
 .nightshift-demo-red/

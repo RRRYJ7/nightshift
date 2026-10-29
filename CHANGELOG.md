@@ -12,6 +12,9 @@ First public release.
   stdout, exit code, duration and sha256 of the captured bytes.
 - Evidence gate: `nsh gate` exits 0 only when every criterion's latest check
   passed *and* carries machine-checkable evidence.
+- `nsh diff` / `nsh baseline`: a project snapshot is taken at `nsh init`, and the
+  report shows what changed since then (added/modified/deleted, line counts from
+  git) plus whether any check ran after each file's last edit.
 - `nsh verify`: recomputes every digest in the log. Tampered captures fail;
   project files edited after their snapshot are reported as *changed* instead,
   because projects move on and a check that always fails is never read.

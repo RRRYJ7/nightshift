@@ -67,6 +67,7 @@ night you did not watch.**
 | **Convergence check** — three flat checkpoints = stop | Hour 7 costing more than it buys |
 | **Evidence gate** — `nsh gate` exits 0 only if every criterion passed *with* proof | Green-by-vibes |
 | **Verification** — `nsh verify` recomputes every hash; a tampered receipt fails | Evidence nobody ever checked |
+| **Change report** — `nsh diff` lists what changed since the plan and whether a check followed | "It says it edited 12 files" |
 | **Flight report** — a single self-contained HTML file with a mandatory *"Not proven"* section | Morning surprises |
 
 ## Quickstart (60 seconds, no API key, no service)
@@ -97,6 +98,7 @@ nsh tick --progress 40 --note "parser done, templating next"
 
 nsh gate        # exit 0 only when every criterion is proven
 nsh verify      # recompute every evidence digest against the bytes on disk
+nsh diff        # what changed since the plan, and what checked it
 nsh report      # .nightshift/reports/flight-report.html
 nsh brief       # the ten lines above
 ```
@@ -142,6 +144,7 @@ One file, no CDN, no JavaScript, printable:
 - **Proven / Not proven** — side by side, each with a sha256 of the captured bytes.
 - **Drift & near-misses** — the churn loop, the silent stretch, the thing that almost went wrong at 04:10.
 - **Where the time went** — every `--target`, how often it was touched, and whether a check followed.
+- **What changed, and what looked at it** — a real diff against the plan (added/modified/deleted, line counts from git) and whether any check ran after each file's last edit.
 - **Convergence + activity** — was hour seven worth it?
 
 There is also a 33-second vertical cut for people who would rather watch than

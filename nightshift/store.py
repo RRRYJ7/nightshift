@@ -102,6 +102,91 @@ def run_capture(
 
 
 # --------------------------------------------------------------------------- #
+# project snapshots: what was there when the shift started
+# --------------------------------------------------------------------------- #
+
+SKIP_DIRS = {
+    ".git", ".nightshift", "node_modules", "__pycache__", ".venv", "venv",
+    "dist", "build", ".pytest_cache", ".mypy_cache", ".ruff_cache", ".idea",
+    ".next", ".cache", "target", "coverage",
+}
+MAX_SCAN_FILES = 5000
+MAX_HASH_BYTES = 2_000_000
+
+
+def scan_project(root: str | os.PathLike, max_files: int = MAX_SCAN_FILES) -> dict[str, dict[str, Any]]:
+    """Hash every file under *root* (bounded), skipping the usual noise.
+
+    This is the baseline a change report is measured against: without a snapshot
+    from the start of the shift, "what changed" is a guess.
+    """
+    base = Path(root)
+    out: dict[str, dict[str, Any]] = {}
+    for p in base.rglob("*"):
+        if any(part in SKIP_DIRS for part in p.parts):
+            continue
+        if not p.is_file():
+            continue
+        try:
+            st = p.stat()
+        except OSError:
+            continue
+        rel = p.relative_to(base).as_posix()
+        if st.st_size > MAX_HASH_BYTES:
+            out[rel] = {"sha256": "", "size": st.st_size, "mtime": int(st.st_mtime), "skipped": True}
+        else:
+            try:
+                out[rel] = {"sha256": util.sha256_file(p), "size": st.st_size, "mtime": int(st.st_mtime)}
+            except OSError:
+                continue
+        if len(out) >= max_files:
+            break
+    return out
+
+
+def git_head(root: str | os.PathLike) -> str | None:
+    """The commit the project was on, so line counts can come from git later."""
+    try:
+        cp = subprocess.run(
+            ["git", "rev-parse", "HEAD"],
+            cwd=str(root), capture_output=True, timeout=10,
+        )
+        if cp.returncode == 0:
+            return cp.stdout.decode("utf-8", "replace").strip()
+    except (OSError, subprocess.SubprocessError):
+        pass
+    return None
+
+
+def git_numstat(root: str | os.PathLike, head: str) -> dict[str, tuple[int, int]]:
+    """Added/deleted lines per file since *head*, straight from git.
+
+    Best-effort: a missing git, a shallow clone or a moved HEAD all just mean
+    the change report falls back to hashes and status without line counts.
+    """
+    out: dict[str, tuple[int, int]] = {}
+    try:
+        cp = subprocess.run(
+            ["git", "diff", "--numstat", head, "--", "."],
+            cwd=str(root), capture_output=True, timeout=30,
+        )
+        if cp.returncode != 0:
+            return out
+        for line in cp.stdout.decode("utf-8", "replace").splitlines():
+            parts = line.split("\t")
+            if len(parts) != 3:
+                continue
+            a, b, path = parts
+            try:
+                out[path] = (int(a), int(b))
+            except ValueError:
+                out[path] = (-1, -1)  # binary
+    except (OSError, subprocess.SubprocessError):
+        pass
+    return out
+
+
+# --------------------------------------------------------------------------- #
 # the store
 # --------------------------------------------------------------------------- #
 
@@ -116,6 +201,10 @@ class Store:
     @property
     def contract_path(self) -> Path:
         return self.root / "contract.json"
+
+    @property
+    def baseline_path(self) -> Path:
+        return self.root / "baseline.json"
 
     @property
     def events_path(self) -> Path:
@@ -191,6 +280,7 @@ class Store:
             ],
         }
         self.save_contract(contract)
+        self.write_baseline()
         self.append(
             {
                 "kind": "init",
@@ -221,6 +311,25 @@ class Store:
         contract["done"] = [d for d in contract["done"] if d["id"] != cid]
         self.save_contract(contract)
         return len(contract["done"]) != before
+
+    # -- project baseline ----------------------------------------------------
+
+    def write_baseline(self) -> dict[str, Any]:
+        """Snapshot the project so `nsh diff` can say what the shift changed."""
+        project = self.root.resolve().parent
+        data = {
+            "v": 1,
+            "ts": util.iso(),
+            "root": str(project),
+            "git_head": git_head(project),
+            "files": scan_project(project),
+        }
+        util.write_json(self.baseline_path, data)
+        return data
+
+    def load_baseline(self) -> dict[str, Any] | None:
+        data = util.read_json(self.baseline_path)
+        return data if isinstance(data, dict) else None
 
     # -- black box -----------------------------------------------------------
 
